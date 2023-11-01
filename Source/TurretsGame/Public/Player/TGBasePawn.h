@@ -20,8 +20,7 @@ public:
 protected:
     UPROPERTY(EditDefaultsOnly, Category = "TG|Input")
     UInputAction* Input_PrimaryAttack;
-
-    // TODO: Future Updated
+    
     UPROPERTY(EditDefaultsOnly, Category = "TG|Components")
     UTGShootComponent* ShootComp;
 

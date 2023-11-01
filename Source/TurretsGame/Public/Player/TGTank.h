@@ -28,19 +28,19 @@ protected:
     UPROPERTY(EditDefaultsOnly, Category = "TG|Input")
     UInputAction* Input_Look;
 
-    UPROPERTY(EditDefaultsOnly, Category = "TG|Components")
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "TG|Components")
     UStaticMeshComponent* Foundation;
 
-    UPROPERTY(EditDefaultsOnly, Category = "TG|Components")
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "TG|Components")
     UStaticMeshComponent* Tower;
 
-    UPROPERTY(EditDefaultsOnly, Category = "TG|Components")
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "TG|Components")
     UStaticMeshComponent* Gun;
 
-    UPROPERTY(EditDefaultsOnly, Category = "TG|Components")
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "TG|Components")
     USpringArmComponent* SpringArmComp;
 
-    UPROPERTY(EditDefaultsOnly, Category = "TG|Components")
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "TG|Components")
     UCameraComponent* CameraComp;
 
     UPROPERTY(EditDefaultsOnly, Category = "TG|Distance")
@@ -59,5 +59,7 @@ protected:
 
     void ChangeTowerRotator();
     void ChangeGunRotator();
+    
+    bool GetResultFromLineTrace(const FVector& StartPoint, const FVector& EndPoint, FHitResult& HitResult);
 
 };

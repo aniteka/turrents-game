@@ -6,6 +6,7 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "DrawDebugHelpers.h"
+#include "Components/TGShootComponent.h"
 
 static TAutoConsoleVariable<bool> CVarDebugDrawInteraction(TEXT("su.DebugDrawInteraction"), false, TEXT("Enable Debug Lines for Change Rotation of Gun Component."), ECVF_Cheat);
 
@@ -18,15 +19,15 @@ ATGTank::ATGTank()
     RootComponent = Foundation;
 
     Tower = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Tower"));
+    Tower->SetAbsolute(false, true);
     Tower->SetupAttachment(Foundation);
 
     Gun = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Gun"));
-    Gun->SetRelativeRotation(FRotator(0.0f, -90.0f, 0.0f));
     Gun->SetupAttachment(Tower);
 
     SpringArmComp = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArmComp"));
     SpringArmComp->bUsePawnControlRotation = true;
-    SpringArmComp->SetupAttachment(Tower);
+    SpringArmComp->SetupAttachment(Foundation);
 
     CameraComp = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComp"));
     CameraComp->SetupAttachment(SpringArmComp);
@@ -65,8 +66,7 @@ void ATGTank::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 void ATGTank::PrimaryAttack()
 {
-    // TODO: Future Tank Attack
-    // ShootComp->
+    ShootComp->ShootFromComponent(Gun);
     UE_LOG(LogTemp, Log, TEXT("[%s] Shooting!!!"), *GetNameSafe(this));
 }
 
@@ -78,14 +78,16 @@ void ATGTank::Move(const FInputActionInstance& Instance)
     {
         FRotator CurrentRotation = Foundation->GetComponentRotation();
         FRotator NewRotation = CurrentRotation + FRotator(0.0f, AxisValue.X, 0.0f);
-        Foundation->SetWorldRotation(NewRotation);
+        
+        Foundation->SetRelativeRotation(NewRotation);
     }
 
     if (AxisValue.Y != 0.0f)
     {
         FVector ForwardVector = Foundation->GetForwardVector();
         FVector MovementDirection = ForwardVector * AxisValue.Y;
-        SetActorLocation(GetActorLocation() + MovementDirection * ForwardSpeed * GetWorld()->DeltaTimeSeconds, true);
+
+        Foundation->AddImpulse(MovementDirection * ForwardSpeed * GetWorld()->DeltaTimeSeconds, NAME_None, true);
     }
 }
 
@@ -99,17 +101,25 @@ void ATGTank::Look(const FInputActionValue& InputValue)
 
 void ATGTank::ChangeTowerRotator()
 {
-    FRotator TowerRot = Tower->GetComponentRotation();
-    TowerRot.Yaw = CameraComp->GetComponentRotation().Yaw;
-
-    Tower->SetWorldRotation(TowerRot, true);
+    FRotator TowerRot = Tower->GetRelativeRotation();
+    TowerRot.Roll = 0.0f;
+    TowerRot.Pitch = 0.0f;
+    
+    TowerRot.Yaw = SpringArmComp->GetTargetRotation().Yaw;
+    
+    Tower->SetRelativeRotation(TowerRot, true);
 }
 
 void ATGTank::ChangeGunRotator()
 {
-    FVector StartPoint = CameraComp->GetComponentLocation();
-    FVector EndPoint = StartPoint + CameraComp->GetComponentRotation().Vector() * TraceDistance;
+    FRotator GunRot = Tower->GetRelativeRotation();
+    GunRot.Pitch = SpringArmComp->GetTargetRotation().Pitch;
 
+    Tower->SetRelativeRotation(GunRot, true);
+}
+
+bool ATGTank::GetResultFromLineTrace(const FVector& StartPoint, const FVector& EndPoint, FHitResult& HitResult)
+{
     FCollisionObjectQueryParams CollisionParams;
     CollisionParams.AddObjectTypesToQuery(ECC_WorldDynamic);
     CollisionParams.AddObjectTypesToQuery(ECC_WorldStatic);
@@ -117,18 +127,5 @@ void ATGTank::ChangeGunRotator()
     FCollisionQueryParams Params;
     Params.AddIgnoredActor(this);
 
-    FHitResult HitResult;
-
-    GetWorld()->LineTraceSingleByObjectType(HitResult, StartPoint, EndPoint, CollisionParams, Params);
-
-    FVector Direction = (HitResult.GetActor() ? HitResult.ImpactPoint : EndPoint) - Gun->GetComponentLocation();
-    FRotator TargetRotation = FRotationMatrix::MakeFromYZ(Direction, Direction).Rotator();
-
-    Gun->SetWorldRotation(TargetRotation);
-
-    if (CVarDebugDrawInteraction.GetValueOnGameThread())
-    {
-        DrawDebugLine(GetWorld(), StartPoint, EndPoint, FColor::Red, false, 2.0f);
-        DrawDebugCircle(GetWorld(), HitResult.GetActor() ? HitResult.ImpactPoint : EndPoint, 32.0f, 16, FColor::Blue, false, 0.1f);
-    }
+    return GetWorld()->LineTraceSingleByObjectType(HitResult, StartPoint, EndPoint, CollisionParams, Params);
 }
