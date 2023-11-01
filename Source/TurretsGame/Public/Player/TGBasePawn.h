@@ -18,13 +18,19 @@ public:
     ATGBasePawn();
 
 protected:
+    UPROPERTY(EditDefaultsOnly, Category = "Components")
+    UTGShootComponent* ShootComp;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Components")
+    UStaticMeshComponent* Tower;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Components")
+    UStaticMeshComponent* Gun;
+
+protected:
     UPROPERTY(EditDefaultsOnly, Category = "TG|Input")
     UInputAction* Input_PrimaryAttack;
-    
-    UPROPERTY(EditDefaultsOnly, Category = "TG|Components")
-    UTGShootComponent* ShootComp;
 
 protected:
     virtual void PrimaryAttack() PURE_VIRTUAL(ATGBasePawn::PrimaryAttack, ;);
-
 };

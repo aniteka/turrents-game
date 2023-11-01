@@ -8,7 +8,6 @@
 UTGShootComponent::UTGShootComponent()
 {
     PrimaryComponentTick.bCanEverTick = false;
-
 }
 
 ATGProjectileBaseActor* UTGShootComponent::ShootFromLocation(FVector Location, FVector ShootDirection)
@@ -34,8 +33,7 @@ ATGProjectileBaseActor* UTGShootComponent::ShootFromActor(AActor* Actor, FName S
         Direction = Actor->GetActorForwardVector();
     }
 
-    if (ShootDirection != FVector::ZeroVector)
-        Direction = ShootDirection;
+    if (ShootDirection != FVector::ZeroVector) Direction = ShootDirection;
 
     return ShootImplementation({Location, Direction});
 }
@@ -58,8 +56,7 @@ ATGProjectileBaseActor* UTGShootComponent::ShootFromComponent(USceneComponent* C
         Direction = Component->GetForwardVector();
     }
 
-    if (ShootDirection != FVector::ZeroVector)
-        Direction = ShootDirection;
+    if (ShootDirection != FVector::ZeroVector) Direction = ShootDirection;
 
     return ShootImplementation({Location, Direction});
 }
@@ -86,10 +83,9 @@ void UTGShootComponent::ShootDelayCallback()
 
 bool UTGShootComponent::ShootDelayCheck(const UTGShootComponent::FInfoForShoot& Info)
 {
-    if (bShootImmediatelyAfterDelay)
-        return true;
-    if (!bUseShootDelay)
-        return false;
+    if (bShootImmediatelyAfterDelay) return true;
+    if (!bUseShootDelay) return false;
+
     if (GetWorld()->GetTimerManager().IsTimerActive(ShootDelayTimerHandle))
     {
         bShootImmediatelyAfterDelay = true;
@@ -102,21 +98,21 @@ bool UTGShootComponent::ShootDelayCheck(const UTGShootComponent::FInfoForShoot& 
 
 ATGProjectileBaseActor* UTGShootComponent::ShootImplementation(const UTGShootComponent::FInfoForShoot& Info)
 {
-    if (ShootDelayCheck(Info))
-        return nullptr;
+    if (ShootDelayCheck(Info)) return nullptr;
 
     FActorSpawnParameters SpawnParameters;
     SpawnParameters.Instigator = GetOwner<APawn>();
-    check(SpawnParameters.Instigator);
-    const auto Projectile = GetWorld()->SpawnActor<ATGProjectileBaseActor>(ProjectileClass, Info.Location, Info.Direction.Rotation(),
-        SpawnParameters);
-    if (!IsValid(Projectile))
-        return nullptr;
+
+    const auto Projectile =
+        GetWorld()->SpawnActor<ATGProjectileBaseActor>(ProjectileClass, Info.Location, Info.Direction.Rotation(), SpawnParameters);
+
+    if (!IsValid(Projectile)) return nullptr;
 
     if (bProjectileSetLifeSpanAfterSpawn)
+    {
         Projectile->SetLifeSpan(ProjectileLifeSpanInSec);
+    }
 
     Projectile->GetStaticMeshComponent()->AddImpulse(Info.Direction * ProjectileImpulseMultiplier, ProjectileSocketToApplyImpulse);
-
     return Projectile;
 }

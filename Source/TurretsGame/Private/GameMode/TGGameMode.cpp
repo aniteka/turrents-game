@@ -70,7 +70,10 @@ void ATGGameMode::SpawnActorsByTransforms(TSubclassOf<AActor>& InClass, const TA
 
     for (const FTransform& TransformForSpawn : Transforms)
     {
-        World->SpawnActor<AActor>(InClass, TransformForSpawn);
+        AActor* NewEnemy = World->SpawnActor<AActor>(InClass, TransformForSpawn);
+        if (!NewEnemy) continue;
+
+        Enemies.Add(NewEnemy);
     }
 }
 

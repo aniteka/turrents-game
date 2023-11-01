@@ -29,6 +29,16 @@ protected:
     void ChangeGunRotator();
 
 protected:
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Components")
+    UStaticMeshComponent* Foundation;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Components")
+    USpringArmComponent* SpringArmComp;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Components")
+    UCameraComponent* CameraComp;
+
+protected:
     UPROPERTY(EditDefaultsOnly, Category = "TG|Input")
     UInputMappingContext* DefaultInputMapping;
 
@@ -38,27 +48,12 @@ protected:
     UPROPERTY(EditDefaultsOnly, Category = "TG|Input")
     UInputAction* Input_Look;
 
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "TG|Components")
-    UStaticMeshComponent* Foundation;
-
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "TG|Components")
-    UStaticMeshComponent* Tower;
-
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "TG|Components")
-    UStaticMeshComponent* Gun;
-
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "TG|Components")
-    USpringArmComponent* SpringArmComp;
-
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "TG|Components")
-    UCameraComponent* CameraComp;
-
     UPROPERTY(EditDefaultsOnly, Category = "TG|Distance")
-    float TraceDistance;
+    float TraceDistance = 1000.f;
 
     UPROPERTY(EditDefaultsOnly, Category = "TG|Movement")
-    float ForwardSpeed;
+    float ForwardSpeed = 500.f;
 
     UPROPERTY(EditDefaultsOnly, Category = "TG|Threshold", meta = (Units = "Degrees"))
-    float GunPitchThreshold;
+    float GunPitchThreshold = 20.f;
 };

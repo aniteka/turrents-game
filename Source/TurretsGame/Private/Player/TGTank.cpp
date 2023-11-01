@@ -31,9 +31,6 @@ ATGTank::ATGTank()
 
     CameraComp = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComp"));
     CameraComp->SetupAttachment(SpringArmComp);
-
-    TraceDistance = 1'000.0f;
-    ForwardSpeed = 500.0f;
 }
 
 void ATGTank::Tick(float DeltaSeconds)
@@ -73,15 +70,15 @@ void ATGTank::Move(const FInputActionInstance& Instance)
 {
     const FVector2D AxisValue = Instance.GetValue().Get<FVector2D>();
 
-    if (AxisValue.X != 0.0f)
+    if (AxisValue.X != 0.f)
     {
         FRotator CurrentRotation = Foundation->GetComponentRotation();
-        FRotator NewRotation = CurrentRotation + FRotator(0.0f, AxisValue.X, 0.0f);
+        FRotator NewRotation = CurrentRotation + FRotator(0.f, AxisValue.X, 0.f);
 
         Foundation->SetRelativeRotation(NewRotation);
     }
 
-    if (AxisValue.Y != 0.0f)
+    if (AxisValue.Y != 0.f)
     {
         FVector ForwardVector = Foundation->GetForwardVector();
         FVector MovementDirection = ForwardVector * AxisValue.Y;
