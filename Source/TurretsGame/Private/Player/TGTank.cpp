@@ -67,7 +67,6 @@ void ATGTank::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 void ATGTank::PrimaryAttack()
 {
     ShootComp->ShootFromComponent(Gun);
-    UE_LOG(LogTemp, Log, TEXT("[%s] Shooting!!!"), *GetNameSafe(this));
 }
 
 void ATGTank::Move(const FInputActionInstance& Instance)
@@ -102,7 +101,7 @@ void ATGTank::Look(const FInputActionValue& InputValue)
 void ATGTank::ChangeTowerRotator()
 {
     FRotator TowerRot = Tower->GetRelativeRotation();
-    TowerRot.Yaw = SpringArmComp->GetTargetRotation().Yaw;
+    TowerRot.Yaw = SpringArmComp->GetTargetRotation().Yaw - Foundation->GetRelativeRotation().Yaw;
 
     Tower->SetRelativeRotation(TowerRot, true);
 }
@@ -110,7 +109,7 @@ void ATGTank::ChangeTowerRotator()
 void ATGTank::ChangeGunRotator()
 {
     FRotator GunRot = Gun->GetRelativeRotation();
-    GunRot.Pitch = SpringArmComp->GetTargetRotation().Pitch;
+    GunRot.Pitch = FMath::ClampAngle(SpringArmComp->GetTargetRotation().Pitch, -GunPitchThreshold, GunPitchThreshold);
 
     Gun->SetRelativeRotation(GunRot, true);
 }

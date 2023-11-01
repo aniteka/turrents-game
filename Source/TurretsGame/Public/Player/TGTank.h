@@ -58,4 +58,7 @@ protected:
 
     UPROPERTY(EditDefaultsOnly, Category = "TG|Movement")
     float ForwardSpeed;
+
+    UPROPERTY(EditDefaultsOnly, Category = "TG|Threshold", meta = (Units = "Degrees"))
+    float GunPitchThreshold;
 };
