@@ -30,21 +30,32 @@ public:
     UFUNCTION(BlueprintPure, Category = "TG|Shoot|Delay")
     float GetRemainsOfShootDelay() const;
 
+    TSubclassOf<ATGProjectileBaseActor> GetProjectileClass() const { return ProjectileClass; }
+    void SetProjectileClass(TSubclassOf<ATGProjectileBaseActor> NewProjectileClass) { ProjectileClass = NewProjectileClass; }
+
+    float GetProjectileImpulseMultiplier() const { return ProjectileImpulseMultiplier; }
+    void SetProjectileImpulseMultiplier(float NewProjectileImpulseMultiplier) { ProjectileImpulseMultiplier = NewProjectileImpulseMultiplier; }
+
+    float GetShootDelayInSec() const { return ShootDelayInSec; }
+    void SetShootDelayInSec(float NewShootDelayInSec) { ShootDelayInSec = NewShootDelayInSec; }
+
 protected:
-    UPROPERTY(EditAnywhere, Category = "TG")
+    UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "TG")
     TSubclassOf<ATGProjectileBaseActor> ProjectileClass;
-    UPROPERTY(EditAnywhere, Category = "TG", DisplayName = "Impulse Multiplier")
+    UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "TG", DisplayName = "Impulse Multiplier")
     float ProjectileImpulseMultiplier = 1000.f;
     UPROPERTY(EditAnywhere, Category = "TG", DisplayName = "Socket To Apply Impulse")
     FName ProjectileSocketToApplyImpulse = NAME_None;
+    
     UPROPERTY(EditAnywhere, Category = "TG", DisplayName = "Set Life Span After Spawn?")
     bool bProjectileSetLifeSpanAfterSpawn = false;
     UPROPERTY(EditAnywhere, Category = "TG", DisplayName = "Life Span In Sec",
         meta = (EditCondition = "bProjectileSetLifeSpanAfterSpawn", EditConditionHides))
     float ProjectileLifeSpanInSec = 10.f;
+    
     UPROPERTY(EditAnywhere, Category = "TG", DisplayName = "Use Shoot Delay?")
     bool bUseShootDelay = false;
-    UPROPERTY(EditAnywhere, Category = "TG", meta = (EditCondition = "bUseShootDelay", EditConditionHides))
+    UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "TG", meta = (EditCondition = "bUseShootDelay", EditConditionHides))
     float ShootDelayInSec = 1.5;
 
 private:
