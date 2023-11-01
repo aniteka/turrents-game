@@ -104,11 +104,19 @@ ATGProjectileBaseActor* UTGShootComponent::ShootImplementation(const UTGShootCom
 {
     if (ShootDelayCheck(Info))
         return nullptr;
-    const auto Projectile = GetWorld()->SpawnActor<ATGProjectileBaseActor>(ProjectileClass, Info.Location, Info.Direction.Rotation());
+
+    FActorSpawnParameters SpawnParameters;
+    SpawnParameters.Instigator = GetOwner<APawn>();
+    check(SpawnParameters.Instigator);
+    const auto Projectile = GetWorld()->SpawnActor<ATGProjectileBaseActor>(ProjectileClass, Info.Location, Info.Direction.Rotation(),
+        SpawnParameters);
     if (!IsValid(Projectile))
         return nullptr;
-    Projectile->GetStaticMeshComponent()->AddImpulse(Info.Direction * ProjectileImpulseMultiplier, ProjectileSocketToApplyImpulse);
+
     if (bProjectileSetLifeSpanAfterSpawn)
         Projectile->SetLifeSpan(ProjectileLifeSpanInSec);
+
+    Projectile->GetStaticMeshComponent()->AddImpulse(Info.Direction * ProjectileImpulseMultiplier, ProjectileSocketToApplyImpulse);
+
     return Projectile;
 }
