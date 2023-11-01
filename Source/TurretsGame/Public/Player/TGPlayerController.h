@@ -6,12 +6,8 @@
 #include "GameFramework/PlayerController.h"
 #include "TGPlayerController.generated.h"
 
-/**
- * 
- */
 UCLASS()
 class TURRETSGAME_API ATGPlayerController : public APlayerController
 {
-	GENERATED_BODY()
-	
+    GENERATED_BODY()
 };

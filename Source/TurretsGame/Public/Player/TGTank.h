@@ -19,6 +19,16 @@ public:
     ATGTank();
 
 protected:
+    virtual void Tick(float DeltaSeconds) override;
+    virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+    virtual void PrimaryAttack() override;
+
+    void Move(const FInputActionInstance& Instance);
+    void Look(const FInputActionValue& InputValue);
+    void ChangeTowerRotator();
+    void ChangeGunRotator();
+
+protected:
     UPROPERTY(EditDefaultsOnly, Category = "TG|Input")
     UInputMappingContext* DefaultInputMapping;
 
@@ -48,18 +58,4 @@ protected:
 
     UPROPERTY(EditDefaultsOnly, Category = "TG|Movement")
     float ForwardSpeed;
-
-    virtual void Tick(float DeltaSeconds) override;
-    
-    virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
-    virtual void PrimaryAttack() override;
-    void Move(const FInputActionInstance& Instance);
-    void Look(const FInputActionValue& InputValue);
-
-    void ChangeTowerRotator();
-    void ChangeGunRotator();
-    
-    bool GetResultFromLineTrace(const FVector& StartPoint, const FVector& EndPoint, FHitResult& HitResult);
-
 };

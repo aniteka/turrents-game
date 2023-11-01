@@ -8,7 +8,8 @@
 #include "DrawDebugHelpers.h"
 #include "Components/TGShootComponent.h"
 
-static TAutoConsoleVariable<bool> CVarDebugDrawInteraction(TEXT("su.DebugDrawInteraction"), false, TEXT("Enable Debug Lines for Change Rotation of Gun Component."), ECVF_Cheat);
+static TAutoConsoleVariable<bool> CVarDebugDrawInteraction(TEXT("su.DebugDrawInteraction"),  //
+    false, TEXT("Enable Debug Lines for Change Rotation of Gun Component."), ECVF_Cheat);
 
 ATGTank::ATGTank()
 {
@@ -16,18 +17,17 @@ ATGTank::ATGTank()
 
     Foundation = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Foundation"));
     Foundation->SetSimulatePhysics(true);
-    RootComponent = Foundation;
+    SetRootComponent(Foundation);
 
     Tower = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Tower"));
-    Tower->SetAbsolute(false, true);
-    Tower->SetupAttachment(Foundation);
+    Tower->SetupAttachment(GetRootComponent());
 
     Gun = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Gun"));
     Gun->SetupAttachment(Tower);
 
     SpringArmComp = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArmComp"));
     SpringArmComp->bUsePawnControlRotation = true;
-    SpringArmComp->SetupAttachment(Foundation);
+    SpringArmComp->SetupAttachment(GetRootComponent());
 
     CameraComp = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComp"));
     CameraComp->SetupAttachment(SpringArmComp);
@@ -78,7 +78,7 @@ void ATGTank::Move(const FInputActionInstance& Instance)
     {
         FRotator CurrentRotation = Foundation->GetComponentRotation();
         FRotator NewRotation = CurrentRotation + FRotator(0.0f, AxisValue.X, 0.0f);
-        
+
         Foundation->SetRelativeRotation(NewRotation);
     }
 
@@ -102,30 +102,15 @@ void ATGTank::Look(const FInputActionValue& InputValue)
 void ATGTank::ChangeTowerRotator()
 {
     FRotator TowerRot = Tower->GetRelativeRotation();
-    TowerRot.Roll = 0.0f;
-    TowerRot.Pitch = 0.0f;
-    
     TowerRot.Yaw = SpringArmComp->GetTargetRotation().Yaw;
-    
+
     Tower->SetRelativeRotation(TowerRot, true);
 }
 
 void ATGTank::ChangeGunRotator()
 {
-    FRotator GunRot = Tower->GetRelativeRotation();
+    FRotator GunRot = Gun->GetRelativeRotation();
     GunRot.Pitch = SpringArmComp->GetTargetRotation().Pitch;
 
-    Tower->SetRelativeRotation(GunRot, true);
-}
-
-bool ATGTank::GetResultFromLineTrace(const FVector& StartPoint, const FVector& EndPoint, FHitResult& HitResult)
-{
-    FCollisionObjectQueryParams CollisionParams;
-    CollisionParams.AddObjectTypesToQuery(ECC_WorldDynamic);
-    CollisionParams.AddObjectTypesToQuery(ECC_WorldStatic);
-
-    FCollisionQueryParams Params;
-    Params.AddIgnoredActor(this);
-
-    return GetWorld()->LineTraceSingleByObjectType(HitResult, StartPoint, EndPoint, CollisionParams, Params);
+    Gun->SetRelativeRotation(GunRot, true);
 }
