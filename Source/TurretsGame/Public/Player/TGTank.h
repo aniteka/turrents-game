@@ -32,10 +32,9 @@ protected:
     UPROPERTY(EditDefaultsOnly, Category = "Components")
     UStaticMeshComponent* Gun;
 
-    virtual void BeginPlay() override;
-
     virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
     virtual void PrimaryAttack() override;
+    void Move(const FInputActionInstance& Instance);
 
 };

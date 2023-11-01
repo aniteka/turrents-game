@@ -13,7 +13,3 @@ ATGBasePawn::ATGBasePawn()
     ShootComp = CreateDefaultSubobject<UTGShootComponent>(TEXT("ShootComp"));
     MovementComp = CreateDefaultSubobject<UFloatingPawnMovement>(TEXT("MovementComp"));
 }
-
-void ATGBasePawn::PrimaryAttack()
-{
-}
