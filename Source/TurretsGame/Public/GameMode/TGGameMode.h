@@ -24,7 +24,8 @@ public:
     ATGGameMode();
 
     virtual void HandleStartingNewPlayer_Implementation(APlayerController* NewPlayer) override;
-    virtual void StartPlay() override;
+
+    void EnemyDestroyed(AActor* EnemyToRemove);
 
 private:
     UPROPERTY()
@@ -49,9 +50,14 @@ private:
     TSubclassOf<AActor> EnemyTurretClass;
 
     EGameType GameType = EGameType::EGT_PlayTank;
+    TArray<AActor*> Enemies;
 
 private:
     ATGPlayerController* GetTGPlayerController();
+    bool IsAllEnemiesDestroyed();
 
+    void SpawnPlayerByGameType();
+    void SpawnEnemiesByGameType();
     void SpawnActorsByTransforms(TSubclassOf<AActor>& InClass, const TArray<FTransform>& Transforms);
+    void RestartTurretGame();
 };

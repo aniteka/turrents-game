@@ -15,6 +15,36 @@ void ATGGameMode::HandleStartingNewPlayer_Implementation(APlayerController* NewP
     if (!NewPlayer) return;
     Super::HandleStartingNewPlayer_Implementation(NewPlayer);
 
+    RestartTurretGame();
+}
+
+void ATGGameMode::EnemyDestroyed(AActor* EnemyToRemove)
+{
+    if (!EnemyToRemove) return;
+
+    if (Enemies.Contains(EnemyToRemove))
+    {
+        Enemies.Remove(EnemyToRemove);
+    }
+
+    if (IsAllEnemiesDestroyed())
+    {
+        RestartGame();
+    }
+}
+
+ATGPlayerController* ATGGameMode::GetTGPlayerController()
+{
+    return (!TGPlayerController) ? Cast<ATGPlayerController>(GetWorld()->GetFirstPlayerController()) : TGPlayerController;
+}
+
+bool ATGGameMode::IsAllEnemiesDestroyed()
+{
+    return Enemies.IsEmpty();
+}
+
+void ATGGameMode::SpawnPlayerByGameType()
+{
     switch (GameType)
     {
         case EGameType::EGT_PlayTank: RestartPlayerAtTransform(GetTGPlayerController(), PlayerTankStartTransform); break;
@@ -22,23 +52,13 @@ void ATGGameMode::HandleStartingNewPlayer_Implementation(APlayerController* NewP
     }
 }
 
-void ATGGameMode::StartPlay()
+void ATGGameMode::SpawnEnemiesByGameType()
 {
-    Super::StartPlay();
-
-    auto World = GetWorld();
-    if (!World) return;
-
     switch (GameType)
     {
         case EGameType::EGT_PlayTank: SpawnActorsByTransforms(EnemyTurretClass, EnemyTurretsTransform); break;
         case EGameType::EGT_PlayTurret: SpawnActorsByTransforms(EnemyTankClass, EnemyTanksTransform); break;
     }
-}
-
-ATGPlayerController* ATGGameMode::GetTGPlayerController()
-{
-    return (!TGPlayerController) ? Cast<ATGPlayerController>(GetWorld()->GetFirstPlayerController()) : TGPlayerController;
 }
 
 void ATGGameMode::SpawnActorsByTransforms(TSubclassOf<AActor>& InClass, const TArray<FTransform>& Transforms)
@@ -52,4 +72,10 @@ void ATGGameMode::SpawnActorsByTransforms(TSubclassOf<AActor>& InClass, const TA
     {
         World->SpawnActor<AActor>(InClass, TransformForSpawn);
     }
+}
+
+void ATGGameMode::RestartTurretGame()
+{
+    SpawnPlayerByGameType();
+    SpawnEnemiesByGameType();
 }
