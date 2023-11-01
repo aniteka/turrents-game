@@ -3,27 +3,39 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Pawn.h"
+#include "TGBasePawn.h"
 #include "TGTank.generated.h"
 
+class UInputMappingContext;
+
 UCLASS()
-class TURRETSGAME_API ATGTank : public APawn
+class TURRETSGAME_API ATGTank : public ATGBasePawn
 {
-	GENERATED_BODY()
+    GENERATED_BODY()
 
 public:
-	// Sets default values for this pawn's properties
-	ATGTank();
+    ATGTank();
 
 protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
+    UPROPERTY(EditDefaultsOnly, Category = "Input")
+    UInputMappingContext* DefaultInputMapping;
 
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+    UPROPERTY(EditDefaultsOnly, Category = "Input")
+    UInputAction* Input_Move;
 
-	// Called to bind functionality to input
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+    UPROPERTY(EditDefaultsOnly, Category = "Components")
+    UStaticMeshComponent* Foundation;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Components")
+    UStaticMeshComponent* Tower;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Components")
+    UStaticMeshComponent* Gun;
+
+    virtual void BeginPlay() override;
+
+    virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+    virtual void PrimaryAttack() override;
 
 };
