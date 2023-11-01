@@ -3,27 +3,61 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Pawn.h"
+#include "TGBasePawn.h"
 #include "TGTank.generated.h"
 
+class UCameraComponent;
+class USpringArmComponent;
+class UInputMappingContext;
+
 UCLASS()
-class TURRETSGAME_API ATGTank : public APawn
+class TURRETSGAME_API ATGTank : public ATGBasePawn
 {
-	GENERATED_BODY()
+    GENERATED_BODY()
 
 public:
-	// Sets default values for this pawn's properties
-	ATGTank();
+    ATGTank();
 
 protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
+    UPROPERTY(EditDefaultsOnly, Category = "TG|Input")
+    UInputMappingContext* DefaultInputMapping;
 
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+    UPROPERTY(EditDefaultsOnly, Category = "TG|Input")
+    UInputAction* Input_Move;
 
-	// Called to bind functionality to input
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+    UPROPERTY(EditDefaultsOnly, Category = "TG|Input")
+    UInputAction* Input_Look;
+
+    UPROPERTY(EditDefaultsOnly, Category = "TG|Components")
+    UStaticMeshComponent* Foundation;
+
+    UPROPERTY(EditDefaultsOnly, Category = "TG|Components")
+    UStaticMeshComponent* Tower;
+
+    UPROPERTY(EditDefaultsOnly, Category = "TG|Components")
+    UStaticMeshComponent* Gun;
+
+    UPROPERTY(EditDefaultsOnly, Category = "TG|Components")
+    USpringArmComponent* SpringArmComp;
+
+    UPROPERTY(EditDefaultsOnly, Category = "TG|Components")
+    UCameraComponent* CameraComp;
+
+    UPROPERTY(EditDefaultsOnly, Category = "TG|Distance")
+    float TraceDistance;
+
+    UPROPERTY(EditDefaultsOnly, Category = "TG|Movement")
+    float ForwardSpeed;
+
+    virtual void Tick(float DeltaSeconds) override;
+    
+    virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+    virtual void PrimaryAttack() override;
+    void Move(const FInputActionInstance& Instance);
+    void Look(const FInputActionValue& InputValue);
+
+    void ChangeTowerRotator();
+    void ChangeGunRotator();
 
 };
