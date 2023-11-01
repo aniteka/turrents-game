@@ -5,11 +5,12 @@ using System.Collections.Generic;
 
 public class TurretsGameEditorTarget : TargetRules
 {
-	public TurretsGameEditorTarget(TargetInfo Target) : base(Target)
-	{
-		Type = TargetType.Editor;
-		DefaultBuildSettings = BuildSettingsVersion.V2;
+    public TurretsGameEditorTarget(TargetInfo Target) : base(Target)
+    {
+        Type = TargetType.Editor;
+        DefaultBuildSettings = BuildSettingsVersion.V2;
+        IncludeOrderVersion = EngineIncludeOrderVersion.Latest;
 
-		ExtraModuleNames.AddRange( new string[] { "TurretsGame" } );
-	}
+        ExtraModuleNames.AddRange(new string[] { "TurretsGame" });
+    }
 }
