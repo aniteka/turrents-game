@@ -25,6 +25,11 @@ public:
     ATGProjectileBaseActor* ShootFromComponent(USceneComponent* Component, FName Socket = NAME_None,
         FVector ShootDirection = FVector::ZeroVector);
 
+    UFUNCTION(BlueprintPure, Category = "TG|Shoot|Delay")
+    bool IsShootDelay() const;
+    UFUNCTION(BlueprintPure, Category = "TG|Shoot|Delay")
+    float GetRemainsOfShootDelay() const;
+
 protected:
     UPROPERTY(EditAnywhere, Category = "TG")
     TSubclassOf<ATGProjectileBaseActor> ProjectileClass;
@@ -37,5 +42,23 @@ protected:
     UPROPERTY(EditAnywhere, Category = "TG", DisplayName = "Life Span In Sec",
         meta = (EditCondition = "bProjectileSetLifeSpanAfterSpawn", EditConditionHides))
     float ProjectileLifeSpanInSec = 10.f;
+    UPROPERTY(EditAnywhere, Category = "TG", DisplayName = "Use Shoot Delay?")
+    bool bUseShootDelay = false;
+    UPROPERTY(EditAnywhere, Category = "TG", meta = (EditCondition = "bUseShootDelay", EditConditionHides))
+    float ShootDelayInSec = 1.5;
 
+private:
+    struct FInfoForShoot
+    {
+        FVector Location;
+        FVector Direction;
+    };
+
+    FTimerHandle ShootDelayTimerHandle;
+    bool bShootImmediatelyAfterDelay = false;
+    FInfoForShoot AfterDelayInfo;
+
+    void ShootDelayCallback();
+    bool ShootDelayCheck(const FInfoForShoot& Info);
+    ATGProjectileBaseActor* ShootImplementation(const FInfoForShoot& Info);
 };

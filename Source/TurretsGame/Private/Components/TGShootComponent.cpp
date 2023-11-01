@@ -13,13 +13,7 @@ UTGShootComponent::UTGShootComponent()
 
 ATGProjectileBaseActor* UTGShootComponent::ShootFromLocation(FVector Location, FVector ShootDirection)
 {
-    const auto Projectile = GetWorld()->SpawnActor<ATGProjectileBaseActor>(ProjectileClass, Location, ShootDirection.Rotation());
-    if (!IsValid(Projectile))
-        return nullptr;
-    Projectile->GetStaticMeshComponent()->AddImpulse(ShootDirection * ProjectileImpulseMultiplier, ProjectileSocketToApplyImpulse);
-    if (bProjectileSetLifeSpanAfterSpawn)
-        Projectile->SetLifeSpan(ProjectileLifeSpanInSec);
-    return Projectile;
+    return ShootImplementation({Location, ShootDirection});
 }
 
 ATGProjectileBaseActor* UTGShootComponent::ShootFromActor(AActor* Actor, FName Socket, FVector ShootDirection)
@@ -43,7 +37,7 @@ ATGProjectileBaseActor* UTGShootComponent::ShootFromActor(AActor* Actor, FName S
     if (ShootDirection != FVector::ZeroVector)
         Direction = ShootDirection;
 
-    return ShootFromLocation(Location, Direction);
+    return ShootImplementation({Location, Direction});
 }
 
 ATGProjectileBaseActor* UTGShootComponent::ShootFromComponent(USceneComponent* Component, FName Socket, FVector ShootDirection)
@@ -67,5 +61,54 @@ ATGProjectileBaseActor* UTGShootComponent::ShootFromComponent(USceneComponent* C
     if (ShootDirection != FVector::ZeroVector)
         Direction = ShootDirection;
 
-    return ShootFromLocation(Location, Direction);
+    return ShootImplementation({Location, Direction});
+}
+
+bool UTGShootComponent::IsShootDelay() const
+{
+    return GetWorld()->GetTimerManager().IsTimerActive(ShootDelayTimerHandle);
+}
+
+float UTGShootComponent::GetRemainsOfShootDelay() const
+{
+    return GetWorld()->GetTimerManager().GetTimerRemaining(ShootDelayTimerHandle);
+}
+
+void UTGShootComponent::ShootDelayCallback()
+{
+    GetWorld()->GetTimerManager().ClearTimer(ShootDelayTimerHandle);
+    if (bShootImmediatelyAfterDelay)
+    {
+        bShootImmediatelyAfterDelay = false;
+        ShootImplementation(AfterDelayInfo);
+    }
+}
+
+bool UTGShootComponent::ShootDelayCheck(const UTGShootComponent::FInfoForShoot& Info)
+{
+    if (bShootImmediatelyAfterDelay)
+        return true;
+    if (!bUseShootDelay)
+        return false;
+    if (GetWorld()->GetTimerManager().IsTimerActive(ShootDelayTimerHandle))
+    {
+        bShootImmediatelyAfterDelay = true;
+        AfterDelayInfo = Info;
+        return true;
+    }
+    GetWorld()->GetTimerManager().SetTimer(ShootDelayTimerHandle, this, &UTGShootComponent::ShootDelayCallback, ShootDelayInSec);
+    return false;
+}
+
+ATGProjectileBaseActor* UTGShootComponent::ShootImplementation(const UTGShootComponent::FInfoForShoot& Info)
+{
+    if (ShootDelayCheck(Info))
+        return nullptr;
+    const auto Projectile = GetWorld()->SpawnActor<ATGProjectileBaseActor>(ProjectileClass, Info.Location, Info.Direction.Rotation());
+    if (!IsValid(Projectile))
+        return nullptr;
+    Projectile->GetStaticMeshComponent()->AddImpulse(Info.Direction * ProjectileImpulseMultiplier, ProjectileSocketToApplyImpulse);
+    if (bProjectileSetLifeSpanAfterSpawn)
+        Projectile->SetLifeSpan(ProjectileLifeSpanInSec);
+    return Projectile;
 }
