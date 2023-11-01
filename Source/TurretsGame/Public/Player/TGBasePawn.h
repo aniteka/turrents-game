@@ -7,7 +7,6 @@
 #include "InputAction.h"
 #include "TGBasePawn.generated.h"
 
-class UFloatingPawnMovement;
 class UTGShootComponent;
 
 UCLASS(Abstract)
@@ -25,9 +24,6 @@ protected:
     // TODO: Future Updated
     UPROPERTY(EditDefaultsOnly, Category = "Components")
     UTGShootComponent* ShootComp;
-
-    UPROPERTY(EditDefaultsOnly, Category = "Components")
-    UFloatingPawnMovement* MovementComp;
 
 protected:
     virtual void PrimaryAttack() PURE_VIRTUAL(ATGBasePawn::PrimaryAttack,;);

@@ -6,6 +6,8 @@
 #include "TGBasePawn.h"
 #include "TGTank.generated.h"
 
+class UCameraComponent;
+class USpringArmComponent;
 class UInputMappingContext;
 
 UCLASS()
@@ -23,6 +25,9 @@ protected:
     UPROPERTY(EditDefaultsOnly, Category = "Input")
     UInputAction* Input_Move;
 
+    UPROPERTY(EditDefaultsOnly, Category = "Input")
+    UInputAction* Input_Look;
+
     UPROPERTY(EditDefaultsOnly, Category = "Components")
     UStaticMeshComponent* Foundation;
 
@@ -32,9 +37,16 @@ protected:
     UPROPERTY(EditDefaultsOnly, Category = "Components")
     UStaticMeshComponent* Gun;
 
+    UPROPERTY(EditDefaultsOnly, Category = "Components")
+    USpringArmComponent* SpringArmComp;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Components")
+    UCameraComponent* CameraComp;
+
     virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
     virtual void PrimaryAttack() override;
     void Move(const FInputActionInstance& Instance);
+    void Look(const FInputActionValue& InputValue);
 
 };

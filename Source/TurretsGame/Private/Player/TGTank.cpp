@@ -3,13 +3,15 @@
 #include "Player/TGTank.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
-#include "GameFramework/FloatingPawnMovement.h"
+#include "Camera/CameraComponent.h"
+#include "GameFramework/SpringArmComponent.h"
 
 ATGTank::ATGTank()
 {
     PrimaryActorTick.bCanEverTick = true;
 
     Foundation = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Foundation"));
+    Foundation->SetSimulatePhysics(true);
     RootComponent = Foundation;
 
     Tower = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Tower"));
@@ -18,7 +20,12 @@ ATGTank::ATGTank()
     Gun = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Gun"));
     Gun->SetupAttachment(Tower);
 
-    MovementComp->SetUpdatedComponent(Foundation);
+    SpringArmComp = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArmComp"));
+    SpringArmComp->bUsePawnControlRotation = true;
+    SpringArmComp->SetupAttachment(Tower);
+
+    CameraComp = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComp"));
+    CameraComp->SetupAttachment(SpringArmComp);
 }
 
 void ATGTank::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -37,13 +44,12 @@ void ATGTank::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
     UEnhancedInputComponent* InputComp = Cast<UEnhancedInputComponent>(PlayerInputComponent);
     InputComp->BindAction(Input_PrimaryAttack, ETriggerEvent::Triggered, this, &ATGTank::PrimaryAttack);
-    InputComp->BindAction(Input_Move, ETriggerEvent::Triggered, this, &ATGTank::PrimaryAttack);
+    InputComp->BindAction(Input_Move, ETriggerEvent::Triggered, this, &ATGTank::Move);
+    InputComp->BindAction(Input_Look, ETriggerEvent::Triggered, this, &ATGTank::Look);
 }
 
 void ATGTank::PrimaryAttack()
 {
-    Super::PrimaryAttack();
-
     // TODO: Future Tank Attack
     // ShootComp->
     UE_LOG(LogTemp, Log, TEXT("[%s] Shooting!!!"), *GetNameSafe(this));
@@ -51,4 +57,20 @@ void ATGTank::PrimaryAttack()
 
 void ATGTank::Move(const FInputActionInstance& Instance)
 {
+    const FVector2D AxisValue = Instance.GetValue().Get<FVector2D>();
+    const FVector Direct{AxisValue.X, AxisValue.Y, 0.0f};
+
+    FVector ForwardVector = Foundation->GetForwardVector();
+
+    FRotator Rot = CameraComp->GetComponentRotation();
+    Rot.Pitch = 0.0f;
+    Rot.Roll = 0.0f;
+}
+
+void ATGTank::Look(const FInputActionValue& InputValue)
+{
+    const FVector2D Value = InputValue.Get<FVector2D>();
+
+    AddControllerYawInput(Value.X);
+    AddControllerPitchInput(Value.Y);
 }
