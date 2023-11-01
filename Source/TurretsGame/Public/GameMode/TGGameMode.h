@@ -23,17 +23,35 @@ class TURRETSGAME_API ATGGameMode : public AGameMode
 public:
     ATGGameMode();
 
-    virtual void BeginPlay() override;
+    virtual void HandleStartingNewPlayer_Implementation(APlayerController* NewPlayer) override;
+    virtual void StartPlay() override;
 
 private:
     UPROPERTY()
     ATGPlayerController* TGPlayerController;
 
     UPROPERTY(EditDefaultsOnly, Category = "TG|GameMode properties")
-    FTransform PlayerStartTransform;
+    FTransform PlayerTankStartTransform;
+
+    UPROPERTY(EditDefaultsOnly, Category = "TG|GameMode properties")
+    FTransform PlayerTurretStartTransform;
+
+    UPROPERTY(EditDefaultsOnly, Category = "TG|GameMode properties")
+    TArray<FTransform> EnemyTurretsTransform;
+
+    UPROPERTY(EditDefaultsOnly, Category = "TG|GameMode properties")
+    TArray<FTransform> EnemyTanksTransform;
+
+    UPROPERTY(EditDefaultsOnly, Category = "TG|GameMode properties")
+    TSubclassOf<AActor> EnemyTankClass;
+
+    UPROPERTY(EditDefaultsOnly, Category = "TG|GameMode properties")
+    TSubclassOf<AActor> EnemyTurretClass;
 
     EGameType GameType = EGameType::EGT_PlayTank;
 
 private:
     ATGPlayerController* GetTGPlayerController();
+
+    void SpawnActorsByTransforms(TSubclassOf<AActor>& InClass, const TArray<FTransform>& Transforms);
 };
