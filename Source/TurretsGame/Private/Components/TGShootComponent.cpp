@@ -1,34 +1,114 @@
 // TurretGame by Team #1. AlphaNova courses
 
-
 #include "Components/TGShootComponent.h"
 
-// Sets default values for this component's properties
+#include "Kismet/KismetMathLibrary.h"
+#include "Projectiles/TGProjectileBaseActor.h"
+
 UTGShootComponent::UTGShootComponent()
 {
-	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
-	// off to improve performance if you don't need them.
-	PrimaryComponentTick.bCanEverTick = true;
+    PrimaryComponentTick.bCanEverTick = false;
 
-	// ...
 }
 
-
-// Called when the game starts
-void UTGShootComponent::BeginPlay()
+ATGProjectileBaseActor* UTGShootComponent::ShootFromLocation(FVector Location, FVector ShootDirection)
 {
-	Super::BeginPlay();
-
-	// ...
-	
+    return ShootImplementation({Location, ShootDirection});
 }
 
-
-// Called every frame
-void UTGShootComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+ATGProjectileBaseActor* UTGShootComponent::ShootFromActor(AActor* Actor, FName Socket, FVector ShootDirection)
 {
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+    check(Actor);
+    FVector Location;
+    FVector Direction;
 
-	// ...
+    if (const auto MeshComponent = Actor->GetComponentByClass<UStaticMeshComponent>(); Socket != NAME_None && MeshComponent)
+    {
+        const auto Transform = MeshComponent->GetSocketTransform(Socket);
+        Location = Transform.GetLocation();
+        Direction = UKismetMathLibrary::GetForwardVector(Transform.Rotator());
+    }
+    else
+    {
+        Location = Actor->GetActorLocation();
+        Direction = Actor->GetActorForwardVector();
+    }
+
+    if (ShootDirection != FVector::ZeroVector)
+        Direction = ShootDirection;
+
+    return ShootImplementation({Location, Direction});
 }
 
+ATGProjectileBaseActor* UTGShootComponent::ShootFromComponent(USceneComponent* Component, FName Socket, FVector ShootDirection)
+{
+    check(Component);
+    FVector Location;
+    FVector Direction;
+
+    if (const auto MeshComponent = Cast<UStaticMeshComponent>(Component); Socket != NAME_None && MeshComponent)
+    {
+        const auto Transform = MeshComponent->GetSocketTransform(Socket);
+        Location = Transform.GetLocation();
+        Direction = UKismetMathLibrary::GetForwardVector(Transform.Rotator());
+    }
+    else
+    {
+        Location = Component->GetComponentLocation();
+        Direction = Component->GetForwardVector();
+    }
+
+    if (ShootDirection != FVector::ZeroVector)
+        Direction = ShootDirection;
+
+    return ShootImplementation({Location, Direction});
+}
+
+bool UTGShootComponent::IsShootDelay() const
+{
+    return GetWorld()->GetTimerManager().IsTimerActive(ShootDelayTimerHandle);
+}
+
+float UTGShootComponent::GetRemainsOfShootDelay() const
+{
+    return GetWorld()->GetTimerManager().GetTimerRemaining(ShootDelayTimerHandle);
+}
+
+void UTGShootComponent::ShootDelayCallback()
+{
+    GetWorld()->GetTimerManager().ClearTimer(ShootDelayTimerHandle);
+    if (bShootImmediatelyAfterDelay)
+    {
+        bShootImmediatelyAfterDelay = false;
+        ShootImplementation(AfterDelayInfo);
+    }
+}
+
+bool UTGShootComponent::ShootDelayCheck(const UTGShootComponent::FInfoForShoot& Info)
+{
+    if (bShootImmediatelyAfterDelay)
+        return true;
+    if (!bUseShootDelay)
+        return false;
+    if (GetWorld()->GetTimerManager().IsTimerActive(ShootDelayTimerHandle))
+    {
+        bShootImmediatelyAfterDelay = true;
+        AfterDelayInfo = Info;
+        return true;
+    }
+    GetWorld()->GetTimerManager().SetTimer(ShootDelayTimerHandle, this, &UTGShootComponent::ShootDelayCallback, ShootDelayInSec);
+    return false;
+}
+
+ATGProjectileBaseActor* UTGShootComponent::ShootImplementation(const UTGShootComponent::FInfoForShoot& Info)
+{
+    if (ShootDelayCheck(Info))
+        return nullptr;
+    const auto Projectile = GetWorld()->SpawnActor<ATGProjectileBaseActor>(ProjectileClass, Info.Location, Info.Direction.Rotation());
+    if (!IsValid(Projectile))
+        return nullptr;
+    Projectile->GetStaticMeshComponent()->AddImpulse(Info.Direction * ProjectileImpulseMultiplier, ProjectileSocketToApplyImpulse);
+    if (bProjectileSetLifeSpanAfterSpawn)
+        Projectile->SetLifeSpan(ProjectileLifeSpanInSec);
+    return Projectile;
+}

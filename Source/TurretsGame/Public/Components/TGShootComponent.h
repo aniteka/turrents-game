@@ -6,23 +6,59 @@
 #include "Components/ActorComponent.h"
 #include "TGShootComponent.generated.h"
 
+class ATGProjectileBaseActor;
 
-UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class TURRETSGAME_API UTGShootComponent : public UActorComponent
 {
-	GENERATED_BODY()
+    GENERATED_BODY()
 
-public:	
-	// Sets default values for this component's properties
-	UTGShootComponent();
+public:
+    UTGShootComponent();
+
+public:
+    UFUNCTION(BlueprintCallable, Category = "TG|Shoot")
+    ATGProjectileBaseActor* ShootFromLocation(FVector Location, FVector ShootDirection);
+    UFUNCTION(BlueprintCallable, Category = "TG|Shoot", meta = (AdvancedDisplay = "ShootDirection, Socket"))
+    ATGProjectileBaseActor* ShootFromActor(AActor* Actor, FName Socket = NAME_None, FVector ShootDirection = FVector::ZeroVector);
+    UFUNCTION(BlueprintCallable, Category = "TG|Shoot", meta = (AdvancedDisplay = "ShootDirection, Socket"))
+    ATGProjectileBaseActor* ShootFromComponent(USceneComponent* Component, FName Socket = NAME_None,
+        FVector ShootDirection = FVector::ZeroVector);
+
+    UFUNCTION(BlueprintPure, Category = "TG|Shoot|Delay")
+    bool IsShootDelay() const;
+    UFUNCTION(BlueprintPure, Category = "TG|Shoot|Delay")
+    float GetRemainsOfShootDelay() const;
 
 protected:
-	// Called when the game starts
-	virtual void BeginPlay() override;
+    UPROPERTY(EditAnywhere, Category = "TG")
+    TSubclassOf<ATGProjectileBaseActor> ProjectileClass;
+    UPROPERTY(EditAnywhere, Category = "TG", DisplayName = "Impulse Multiplier")
+    float ProjectileImpulseMultiplier = 1000.f;
+    UPROPERTY(EditAnywhere, Category = "TG", DisplayName = "Socket To Apply Impulse")
+    FName ProjectileSocketToApplyImpulse = NAME_None;
+    UPROPERTY(EditAnywhere, Category = "TG", DisplayName = "Set Life Span After Spawn?")
+    bool bProjectileSetLifeSpanAfterSpawn = false;
+    UPROPERTY(EditAnywhere, Category = "TG", DisplayName = "Life Span In Sec",
+        meta = (EditCondition = "bProjectileSetLifeSpanAfterSpawn", EditConditionHides))
+    float ProjectileLifeSpanInSec = 10.f;
+    UPROPERTY(EditAnywhere, Category = "TG", DisplayName = "Use Shoot Delay?")
+    bool bUseShootDelay = false;
+    UPROPERTY(EditAnywhere, Category = "TG", meta = (EditCondition = "bUseShootDelay", EditConditionHides))
+    float ShootDelayInSec = 1.5;
 
-public:	
-	// Called every frame
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+private:
+    struct FInfoForShoot
+    {
+        FVector Location;
+        FVector Direction;
+    };
 
-		
+    FTimerHandle ShootDelayTimerHandle;
+    bool bShootImmediatelyAfterDelay = false;
+    FInfoForShoot AfterDelayInfo;
+
+    void ShootDelayCallback();
+    bool ShootDelayCheck(const FInfoForShoot& Info);
+    ATGProjectileBaseActor* ShootImplementation(const FInfoForShoot& Info);
 };
