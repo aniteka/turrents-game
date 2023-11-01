@@ -49,6 +49,8 @@ protected:
     UPROPERTY(EditDefaultsOnly, Category = "TG|Movement")
     float ForwardSpeed;
 
+    virtual void Tick(float DeltaSeconds) override;
+    
     virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
     virtual void PrimaryAttack() override;

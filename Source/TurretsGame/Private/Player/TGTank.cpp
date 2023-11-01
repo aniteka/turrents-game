@@ -35,6 +35,14 @@ ATGTank::ATGTank()
     ForwardSpeed = 500.0f;
 }
 
+void ATGTank::Tick(float DeltaSeconds)
+{
+    Super::Tick(DeltaSeconds);
+
+    ChangeTowerRotator();
+    ChangeGunRotator();
+}
+
 void ATGTank::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
     Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -87,9 +95,6 @@ void ATGTank::Look(const FInputActionValue& InputValue)
 
     AddControllerYawInput(Value.X);
     AddControllerPitchInput(Value.Y);
-
-    ChangeTowerRotator();
-    ChangeGunRotator();
 }
 
 void ATGTank::ChangeTowerRotator()
