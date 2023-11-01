@@ -5,6 +5,9 @@
 #include "EnhancedInputSubsystems.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "DrawDebugHelpers.h"
+
+static TAutoConsoleVariable<bool> CVarDebugDrawInteraction(TEXT("su.DebugDrawInteraction"), false, TEXT("Enable Debug Lines for Change Rotation of Gun Component."), ECVF_Cheat);
 
 ATGTank::ATGTank()
 {
@@ -18,6 +21,7 @@ ATGTank::ATGTank()
     Tower->SetupAttachment(Foundation);
 
     Gun = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Gun"));
+    Gun->SetRelativeRotation(FRotator(0.0f, -90.0f, 0.0f));
     Gun->SetupAttachment(Tower);
 
     SpringArmComp = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArmComp"));
@@ -58,13 +62,22 @@ void ATGTank::PrimaryAttack()
 void ATGTank::Move(const FInputActionInstance& Instance)
 {
     const FVector2D AxisValue = Instance.GetValue().Get<FVector2D>();
-    const FVector Direct{AxisValue.X, AxisValue.Y, 0.0f};
 
-    FVector ForwardVector = Foundation->GetForwardVector();
+    if (AxisValue.X != 0.0f)
+    {
+        FRotator CurrentRotation = Foundation->GetComponentRotation();
+        FRotator NewRotation = CurrentRotation + FRotator(0.0f, AxisValue.X, 0.0f);
+        Foundation->SetWorldRotation(NewRotation);
+    }
 
-    FRotator Rot = CameraComp->GetComponentRotation();
-    Rot.Pitch = 0.0f;
-    Rot.Roll = 0.0f;
+    if (AxisValue.Y != 0.0f)
+    {
+        float Speed = 500.0f;
+        
+        FVector ForwardVector = Foundation->GetForwardVector();
+        FVector MovementDirection = ForwardVector * AxisValue.Y;
+        SetActorLocation(GetActorLocation() + MovementDirection * Speed * GetWorld()->DeltaTimeSeconds);
+    }
 }
 
 void ATGTank::Look(const FInputActionValue& InputValue)
@@ -73,4 +86,44 @@ void ATGTank::Look(const FInputActionValue& InputValue)
 
     AddControllerYawInput(Value.X);
     AddControllerPitchInput(Value.Y);
+
+    ChangeTowerRotator();
+    ChangeGunRotator();
+}
+
+void ATGTank::ChangeTowerRotator()
+{
+    FRotator TowerRot = Tower->GetComponentRotation();
+    TowerRot.Yaw = CameraComp->GetComponentRotation().Yaw;
+
+    Tower->SetWorldRotation(TowerRot, true);
+}
+
+void ATGTank::ChangeGunRotator()
+{
+    float DistanceTrace = 1'000.0f;
+    FVector StartPoint = CameraComp->GetComponentLocation();
+    FVector EndPoint = StartPoint + CameraComp->GetComponentRotation().Vector() * DistanceTrace;
+
+    FCollisionObjectQueryParams CollisionParams;
+    CollisionParams.AddObjectTypesToQuery(ECC_WorldDynamic);
+    CollisionParams.AddObjectTypesToQuery(ECC_WorldStatic);
+
+    FCollisionQueryParams Params;
+    Params.AddIgnoredActor(this);
+
+    FHitResult HitResult;
+
+    GetWorld()->LineTraceSingleByObjectType(HitResult, StartPoint, EndPoint, CollisionParams, Params);
+
+    FVector Direction = (HitResult.GetActor() ? HitResult.ImpactPoint : EndPoint) - Gun->GetComponentLocation();
+    FRotator TargetRotation = FRotationMatrix::MakeFromYZ(Direction, Direction).Rotator();
+
+    Gun->SetWorldRotation(TargetRotation);
+
+    if (CVarDebugDrawInteraction.GetValueOnGameThread())
+    {
+        DrawDebugLine(GetWorld(), StartPoint, EndPoint, FColor::Red, false, 2.0f);
+        DrawDebugCircle(GetWorld(), HitResult.GetActor() ? HitResult.ImpactPoint : EndPoint, 32.0f, 16, FColor::Blue, false, 0.1f);
+    }
 }

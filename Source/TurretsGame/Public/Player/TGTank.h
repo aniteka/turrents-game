@@ -19,28 +19,28 @@ public:
     ATGTank();
 
 protected:
-    UPROPERTY(EditDefaultsOnly, Category = "Input")
+    UPROPERTY(EditDefaultsOnly, Category = "TG|Input")
     UInputMappingContext* DefaultInputMapping;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Input")
+    UPROPERTY(EditDefaultsOnly, Category = "TG|Input")
     UInputAction* Input_Move;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Input")
+    UPROPERTY(EditDefaultsOnly, Category = "TG|Input")
     UInputAction* Input_Look;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Components")
+    UPROPERTY(EditDefaultsOnly, Category = "TG|Components")
     UStaticMeshComponent* Foundation;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Components")
+    UPROPERTY(EditDefaultsOnly, Category = "TG|Components")
     UStaticMeshComponent* Tower;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Components")
+    UPROPERTY(EditDefaultsOnly, Category = "TG|Components")
     UStaticMeshComponent* Gun;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Components")
+    UPROPERTY(EditDefaultsOnly, Category = "TG|Components")
     USpringArmComponent* SpringArmComp;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Components")
+    UPROPERTY(EditDefaultsOnly, Category = "TG|Components")
     UCameraComponent* CameraComp;
 
     virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
@@ -48,5 +48,8 @@ protected:
     virtual void PrimaryAttack() override;
     void Move(const FInputActionInstance& Instance);
     void Look(const FInputActionValue& InputValue);
+
+    void ChangeTowerRotator();
+    void ChangeGunRotator();
 
 };

@@ -18,14 +18,14 @@ public:
     ATGBasePawn();
 
 protected:
-    UPROPERTY(EditDefaultsOnly, Category = "Input")
+    UPROPERTY(EditDefaultsOnly, Category = "TG|Input")
     UInputAction* Input_PrimaryAttack;
 
     // TODO: Future Updated
-    UPROPERTY(EditDefaultsOnly, Category = "Components")
+    UPROPERTY(EditDefaultsOnly, Category = "TG|Components")
     UTGShootComponent* ShootComp;
 
 protected:
-    virtual void PrimaryAttack() PURE_VIRTUAL(ATGBasePawn::PrimaryAttack,;);
+    virtual void PrimaryAttack() PURE_VIRTUAL(ATGBasePawn::PrimaryAttack, ;);
 
 };
