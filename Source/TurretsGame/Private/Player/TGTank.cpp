@@ -30,6 +30,9 @@ ATGTank::ATGTank()
 
     CameraComp = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComp"));
     CameraComp->SetupAttachment(SpringArmComp);
+
+    TraceDistance = 1'000.0f;
+    ForwardSpeed = 500.0f;
 }
 
 void ATGTank::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -72,11 +75,9 @@ void ATGTank::Move(const FInputActionInstance& Instance)
 
     if (AxisValue.Y != 0.0f)
     {
-        float Speed = 500.0f;
-        
         FVector ForwardVector = Foundation->GetForwardVector();
         FVector MovementDirection = ForwardVector * AxisValue.Y;
-        SetActorLocation(GetActorLocation() + MovementDirection * Speed * GetWorld()->DeltaTimeSeconds);
+        SetActorLocation(GetActorLocation() + MovementDirection * ForwardSpeed * GetWorld()->DeltaTimeSeconds, true);
     }
 }
 
@@ -101,9 +102,8 @@ void ATGTank::ChangeTowerRotator()
 
 void ATGTank::ChangeGunRotator()
 {
-    float DistanceTrace = 1'000.0f;
     FVector StartPoint = CameraComp->GetComponentLocation();
-    FVector EndPoint = StartPoint + CameraComp->GetComponentRotation().Vector() * DistanceTrace;
+    FVector EndPoint = StartPoint + CameraComp->GetComponentRotation().Vector() * TraceDistance;
 
     FCollisionObjectQueryParams CollisionParams;
     CollisionParams.AddObjectTypesToQuery(ECC_WorldDynamic);
