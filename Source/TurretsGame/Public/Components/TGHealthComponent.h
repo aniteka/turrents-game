@@ -7,6 +7,7 @@
 #include "TGHealthComponent.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnDeathDelegate, AActor*, Actor);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnHpChangeDelegate, AActor*, Actor, float, NewHp, float, Delta);
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class TURRETSGAME_API UTGHealthComponent : public UActorComponent
@@ -42,7 +43,9 @@ protected:
 public:
     UPROPERTY(BlueprintAssignable, Category = "Delegates")
     FOnDeathDelegate OnDeathDelegate;
-
+    UPROPERTY(BlueprintAssignable, Category = "Delegates")
+    FOnHpChangeDelegate OnHpChangeDelegate;
+    
 private:
     UPROPERTY(BlueprintSetter = SetHp, BlueprintGetter = GetHp, Category = "TG", meta = (AllowPrivateAccess = 1))
     float Hp = 0.f;

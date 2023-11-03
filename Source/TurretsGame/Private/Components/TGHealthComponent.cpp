@@ -25,7 +25,9 @@ void UTGHealthComponent::BeginPlay()
 
 void UTGHealthComponent::SetHp(float NewHp)
 {
+    const auto OldHp = Hp;
     Hp = FMath::Clamp(NewHp, 0.f, MaxHp);
+    OnHpChangeDelegate.Broadcast(GetOwner(), Hp, Hp - OldHp);
     DeathCheck(Hp);
 }
 
