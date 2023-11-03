@@ -105,8 +105,5 @@ void ATGTank::ChangeTowerRotator()
 
 void ATGTank::ChangeGunRotator()
 {
-    FRotator GunRot = Gun->GetRelativeRotation();
-    GunRot.Pitch = FMath::ClampAngle(SpringArmComp->GetTargetRotation().Pitch, -GunPitchThreshold, GunPitchThreshold);
-
-    Gun->SetRelativeRotation(GunRot, true);
+    Super::ChangeGunRotator();
 }

@@ -18,3 +18,11 @@ void ATGBasePawn::ChangeTowerRotator()
 
     Tower->SetRelativeRotation(TowerRot, true);
 }
+
+void ATGBasePawn::ChangeGunRotator()
+{
+    FRotator GunRot = Gun->GetRelativeRotation();
+    GunRot.Pitch = FMath::ClampAngle(SpringArmComp->GetTargetRotation().Pitch, -GunPitchThreshold, GunPitchThreshold);
+
+    Gun->SetRelativeRotation(GunRot, true);
+}

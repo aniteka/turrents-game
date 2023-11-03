@@ -26,7 +26,7 @@ protected:
     void Move(const FInputActionInstance& Instance);
     void Look(const FInputActionValue& InputValue);
     virtual void ChangeTowerRotator() override;
-    void ChangeGunRotator();
+    virtual void ChangeGunRotator() override;
 
 protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Components")
@@ -47,7 +47,4 @@ protected:
 
     UPROPERTY(EditDefaultsOnly, Category = "TG|Movement")
     float ForwardSpeed = 500.f;
-
-    UPROPERTY(EditDefaultsOnly, Category = "TG|Threshold", meta = (Units = "Degrees"))
-    float GunPitchThreshold = 20.f;
 };

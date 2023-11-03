@@ -39,7 +39,11 @@ protected:
     UPROPERTY(EditDefaultsOnly, Category = "TG|Input")
     UInputAction* Input_PrimaryAttack;
 
+    UPROPERTY(EditDefaultsOnly, Category = "TG|Threshold", meta = (Units = "Degrees"))
+    float GunPitchThreshold = 20.f;
+    
 protected:
     virtual void PrimaryAttack() PURE_VIRTUAL(ATGBasePawn::PrimaryAttack, ;);
     virtual void ChangeTowerRotator();
+    virtual void ChangeGunRotator();
 };
