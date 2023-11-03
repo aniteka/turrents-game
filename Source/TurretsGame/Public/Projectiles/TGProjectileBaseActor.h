@@ -21,7 +21,7 @@ protected:
     virtual void BeginPlay() override;
 
 public:
-    UStaticMeshComponent* GetStaticMeshComponent() const { return GetComponentByClass<UStaticMeshComponent>(); }
+    FORCEINLINE UStaticMeshComponent* GetStaticMeshComponent() const { return GetComponentByClass<UStaticMeshComponent>(); }
 
 protected:
     UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Components")

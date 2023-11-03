@@ -36,17 +36,17 @@ public:
     UFUNCTION(BlueprintPure, Category = "TG|Shoot|Delay")
     float GetRemainsOfShootDelay() const;
 
-    TSubclassOf<ATGProjectileBaseActor> GetProjectileClass() const { return ProjectileClass; }
-    void SetProjectileClass(TSubclassOf<ATGProjectileBaseActor> NewProjectileClass) { ProjectileClass = NewProjectileClass; }
+    FORCEINLINE TSubclassOf<ATGProjectileBaseActor> GetProjectileClass() const { return ProjectileClass; }
+    FORCEINLINE void SetProjectileClass(TSubclassOf<ATGProjectileBaseActor> NewProjectileClass) { ProjectileClass = NewProjectileClass; }
 
-    float GetProjectileImpulseMultiplier() const { return ProjectileImpulseMultiplier; }
-    void SetProjectileImpulseMultiplier(float NewProjectileImpulseMultiplier)
+    FORCEINLINE float GetProjectileImpulseMultiplier() const { return ProjectileImpulseMultiplier; }
+    FORCEINLINE void SetProjectileImpulseMultiplier(float NewProjectileImpulseMultiplier)
     {
         ProjectileImpulseMultiplier = NewProjectileImpulseMultiplier;
     }
 
-    float GetShootDelayInSec() const { return ShootDelayInSec; }
-    void SetShootDelayInSec(float NewShootDelayInSec) { ShootDelayInSec = NewShootDelayInSec; }
+    FORCEINLINE float GetShootDelayInSec() const { return ShootDelayInSec; }
+    FORCEINLINE void SetShootDelayInSec(float NewShootDelayInSec) { ShootDelayInSec = NewShootDelayInSec; }
 
 protected:
     UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "TG")
