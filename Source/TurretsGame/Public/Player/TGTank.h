@@ -25,18 +25,12 @@ protected:
 
     void Move(const FInputActionInstance& Instance);
     void Look(const FInputActionValue& InputValue);
-    void ChangeTowerRotator();
+    virtual void ChangeTowerRotator() override;
     void ChangeGunRotator();
 
 protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Components")
     UStaticMeshComponent* Foundation;
-
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Components")
-    USpringArmComponent* SpringArmComp;
-
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Components")
-    UCameraComponent* CameraComp;
 
 protected:
     UPROPERTY(EditDefaultsOnly, Category = "TG|Input")

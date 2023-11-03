@@ -7,6 +7,8 @@
 #include "InputAction.h"
 #include "TGBasePawn.generated.h"
 
+class UCameraComponent;
+class USpringArmComponent;
 class UTGShootComponent;
 
 UCLASS(Abstract)
@@ -27,10 +29,17 @@ protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Components")
     UStaticMeshComponent* Gun;
 
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Components")
+    USpringArmComponent* SpringArmComp;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Components")
+    UCameraComponent* CameraComp;
+
 protected:
     UPROPERTY(EditDefaultsOnly, Category = "TG|Input")
     UInputAction* Input_PrimaryAttack;
 
 protected:
     virtual void PrimaryAttack() PURE_VIRTUAL(ATGBasePawn::PrimaryAttack, ;);
+    virtual void ChangeTowerRotator();
 };
