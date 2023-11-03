@@ -61,6 +61,11 @@ ATGProjectileBaseActor* UTGShootComponent::ShootFromComponent(USceneComponent* C
     return ShootImplementation({Location, Direction});
 }
 
+bool UTGShootComponent::CanShootNow() const
+{
+    return !IsShootDelay();
+}
+
 bool UTGShootComponent::IsShootDelay() const
 {
     return GetWorld()->GetTimerManager().IsTimerActive(ShootDelayTimerHandle);
@@ -74,31 +79,41 @@ float UTGShootComponent::GetRemainsOfShootDelay() const
 void UTGShootComponent::ShootDelayCallback()
 {
     GetWorld()->GetTimerManager().ClearTimer(ShootDelayTimerHandle);
-    if (bShootImmediatelyAfterDelay)
+    if (bUseDeferredShot && bShootImmediatelyAfterDelay)
     {
         bShootImmediatelyAfterDelay = false;
         ShootImplementation(AfterDelayInfo);
     }
 }
 
-bool UTGShootComponent::ShootDelayCheck(const UTGShootComponent::FInfoForShoot& Info)
+bool UTGShootComponent::PreShootCheck(const FInfoForShoot& Info)
 {
-    if (bShootImmediatelyAfterDelay) return true;
-    if (!bUseShootDelay) return false;
+    if (!bUseShootDelay) return true;
+    if (bShootImmediatelyAfterDelay) return false;
 
-    if (GetWorld()->GetTimerManager().IsTimerActive(ShootDelayTimerHandle))
+    if (IsShootDelay())
     {
-        bShootImmediatelyAfterDelay = true;
-        AfterDelayInfo = Info;
-        return true;
+        if (bUseDeferredShot && (RemainingTimeForDeferredShot == -1.f)
+                ? true
+                : GetWorld()->GetTimerManager().GetTimerRemaining(ShootDelayTimerHandle) <= RemainingTimeForDeferredShot)
+        {
+            bShootImmediatelyAfterDelay = true;
+            AfterDelayInfo = Info;
+        }
+        return false;
     }
-    GetWorld()->GetTimerManager().SetTimer(ShootDelayTimerHandle, this, &UTGShootComponent::ShootDelayCallback, ShootDelayInSec);
-    return false;
+
+    if (!IsShootDelay())
+    {
+        GetWorld()->GetTimerManager().SetTimer(ShootDelayTimerHandle, this, &UTGShootComponent::ShootDelayCallback, ShootDelayInSec);
+    }
+    return true;
 }
 
 ATGProjectileBaseActor* UTGShootComponent::ShootImplementation(const UTGShootComponent::FInfoForShoot& Info)
 {
-    if (ShootDelayCheck(Info)) return nullptr;
+    if (!PreShootCheck(Info))
+        return nullptr;
 
     FActorSpawnParameters SpawnParameters;
     SpawnParameters.Instigator = GetOwner<APawn>();

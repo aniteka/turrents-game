@@ -27,6 +27,9 @@ public:
     ATGProjectileBaseActor* ShootFromComponent(
         USceneComponent* Component, FName Socket = NAME_None, FVector ShootDirection = FVector::ZeroVector);
 
+    UFUNCTION(BlueprintPure, Category = "TG|Shoot")
+    bool CanShootNow() const;
+    
     UFUNCTION(BlueprintPure, Category = "TG|Shoot|Delay")
     bool IsShootDelay() const;
 
@@ -62,12 +65,19 @@ protected:
         meta = (EditCondition = "bProjectileSetLifeSpanAfterSpawn", EditConditionHides))
     float ProjectileLifeSpanInSec = 10.f;
 
-    UPROPERTY(EditAnywhere, Category = "TG", DisplayName = "Use Shoot Delay?")
+    UPROPERTY(EditAnywhere, Category = "TG|Delay", DisplayName = "Use Shoot Delay?")
     bool bUseShootDelay = false;
 
-    UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "TG", meta = (EditCondition = "bUseShootDelay", EditConditionHides))
+    UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "TG|Delay", meta = (EditCondition = "bUseShootDelay", EditConditionHides))
     float ShootDelayInSec = 1.5f;
 
+    UPROPERTY(EditAnywhere, Category = "TG|Delay", DisplayName = "Use Deferred Shot?", meta = (EditCondition = "bUseShootDelay", EditConditionHides))
+    bool bUseDeferredShot = false;
+
+    // -1 means use time from ShootDelayInSec
+    UPROPERTY(EditAnywhere, Category = "TG|Delay", meta = (EditCondition = "bUseDeferredShot", EditConditionHides))
+    float RemainingTimeForDeferredShot = -1.f;
+    
 private:
     struct FInfoForShoot
     {
@@ -80,6 +90,10 @@ private:
     FInfoForShoot AfterDelayInfo;
 
     void ShootDelayCallback();
-    bool ShootDelayCheck(const FInfoForShoot& Info);
+    
+    /**
+     * @return true - can shoot | false - cant 
+     */
+    bool PreShootCheck(const FInfoForShoot& Info);
     ATGProjectileBaseActor* ShootImplementation(const FInfoForShoot& Info);
 };
