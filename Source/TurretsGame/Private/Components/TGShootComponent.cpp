@@ -127,7 +127,5 @@ ATGProjectileBaseActor* UTGShootComponent::ShootImplementation(const UTGShootCom
     {
         Projectile->SetLifeSpan(ProjectileLifeSpanInSec);
     }
-
-    Projectile->GetStaticMeshComponent()->AddImpulse(Info.Direction * ProjectileImpulseMultiplier, ProjectileSocketToApplyImpulse);
     return Projectile;
 }

@@ -39,21 +39,12 @@ public:
     FORCEINLINE TSubclassOf<ATGProjectileBaseActor> GetProjectileClass() const { return ProjectileClass; }
     FORCEINLINE void SetProjectileClass(TSubclassOf<ATGProjectileBaseActor> NewProjectileClass) { ProjectileClass = NewProjectileClass; }
 
-    FORCEINLINE float GetProjectileImpulseMultiplier() const { return ProjectileImpulseMultiplier; }
-    FORCEINLINE void SetProjectileImpulseMultiplier(float NewProjectileImpulseMultiplier)
-    {
-        ProjectileImpulseMultiplier = NewProjectileImpulseMultiplier;
-    }
-
     FORCEINLINE float GetShootDelayInSec() const { return ShootDelayInSec; }
     FORCEINLINE void SetShootDelayInSec(float NewShootDelayInSec) { ShootDelayInSec = NewShootDelayInSec; }
 
 protected:
     UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "TG")
     TSubclassOf<ATGProjectileBaseActor> ProjectileClass;
-
-    UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "TG", DisplayName = "Impulse Multiplier")
-    float ProjectileImpulseMultiplier = 1000.f;
 
     UPROPERTY(EditAnywhere, Category = "TG", DisplayName = "Socket To Apply Impulse")
     FName ProjectileSocketToApplyImpulse = NAME_None;
