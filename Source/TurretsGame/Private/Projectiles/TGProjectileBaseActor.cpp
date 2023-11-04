@@ -3,6 +3,7 @@
 #include "Projectiles/TGProjectileBaseActor.h"
 
 #include "Engine/DamageEvents.h"
+#include "GameFramework/ProjectileMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 
 ATGProjectileBaseActor::ATGProjectileBaseActor()
@@ -13,6 +14,8 @@ ATGProjectileBaseActor::ATGProjectileBaseActor()
     StaticMeshComponent->SetSimulatePhysics(true);
     StaticMeshComponent->SetCollisionResponseToAllChannels(ECR_Block);
     SetRootComponent(StaticMeshComponent);
+
+    ProjectileMovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>("ProjectileMovementComponent");
 }
 
 void ATGProjectileBaseActor::BeginPlay()

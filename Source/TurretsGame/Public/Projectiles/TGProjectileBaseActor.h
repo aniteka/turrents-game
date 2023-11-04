@@ -21,11 +21,14 @@ protected:
     virtual void BeginPlay() override;
 
 public:
-    FORCEINLINE UStaticMeshComponent* GetStaticMeshComponent() const { return GetComponentByClass<UStaticMeshComponent>(); }
-
+    FORCEINLINE UStaticMeshComponent* GetStaticMeshComponent() const { return StaticMeshComponent; }
+    FORCEINLINE UProjectileMovementComponent* GetProjectileMovementComponent() const { return ProjectileMovementComponent; }
+    
 protected:
     UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Components")
     UStaticMeshComponent* StaticMeshComponent;
+    UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Components")
+    UProjectileMovementComponent* ProjectileMovementComponent;
 
     UPROPERTY(EditAnywhere, Category = "TG")
     float HitDamage = 10.f;
