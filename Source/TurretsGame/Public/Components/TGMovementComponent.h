@@ -23,6 +23,7 @@ public:
 
     virtual bool HasGroundContact() const;
 
+    /** Returned percent, 0 -> 1 moving forward, 0 -> -1 moving back */
     UFUNCTION(BlueprintCallable, Category = "Movement")
     FORCEINLINE float GetPowerEngine() const { return Power; };
 
