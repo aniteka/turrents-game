@@ -22,6 +22,9 @@ class TURRETSGAME_API ATGBasePawn : public APawn
 public:
     ATGBasePawn();
 
+    float GetHealthPercent() const;
+    float GetShootDelayPercent() const;
+
 protected:
     UPROPERTY(EditDefaultsOnly, Category = "Components")
     UTGShootComponent* ShootComp;
@@ -60,6 +63,7 @@ protected:
 protected:
     virtual void Tick(float DeltaSeconds) override;
     virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+    virtual void BeginPlay() override;
 
     void Look(const FInputActionValue& InputValue);
     virtual void ChangeTowerRotator();

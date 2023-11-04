@@ -16,15 +16,4 @@ class TURRETSGAME_API ATGMenuPlayerController : public APlayerController
 
 public:
     void StartPlayByGameType(EGameType Type);
-
-protected:
-    virtual void BeginPlay() override;
-
-private:
-    UPROPERTY()
-    ATG_HUD* TG_HUD;
-
-private:
-    void UpdateHUDVar();
-    void AddMenuWidget();
 };

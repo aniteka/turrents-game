@@ -74,7 +74,16 @@ bool UTGShootComponent::IsShootDelay() const
 
 float UTGShootComponent::GetRemainsOfShootDelay() const
 {
-    return GetWorld()->GetTimerManager().GetTimerRemaining(ShootDelayTimerHandle);
+    if (!GetWorld()) return 0.f;
+
+    if (GetWorld()->GetTimerManager().IsTimerActive(ShootDelayTimerHandle))
+    {
+        return GetWorld()->GetTimerManager().GetTimerRemaining(ShootDelayTimerHandle);
+    }
+    else
+    {
+        return ShootDelayInSec;
+    }
 }
 
 void UTGShootComponent::DrawCrosshair(USceneComponent* Component, FName Socket, FVector ShootDirection)
@@ -133,4 +142,9 @@ ATGProjectileBaseActor* UTGShootComponent::ShootImplementation(const UTGShootCom
         Projectile->SetLifeSpan(ProjectileLifeSpanInSec);
     }
     return Projectile;
+}
+
+float UTGShootComponent::GetShootDelayPercent() const
+{
+    return GetRemainsOfShootDelay() / ShootDelayInSec;
 }

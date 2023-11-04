@@ -1,13 +1,14 @@
 // TurretGame by Team #1. AlphaNova courses
 
 #include "Player/TGBasePawn.h"
+#include "Player/TGPlayerController.h"
 #include "Components/TGShootComponent.h"
 #include "Components/TGHealthComponent.h"
+#include "Components/BoxComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
-#include "Components/BoxComponent.h"
 
 ATGBasePawn::ATGBasePawn()
 {
@@ -34,6 +35,18 @@ ATGBasePawn::ATGBasePawn()
     CameraComp = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComp"));
     CameraComp->SetRelativeLocation(FVector(0.f, -300.f, 0.f));
     CameraComp->SetupAttachment(SpringArmComp);
+}
+
+float ATGBasePawn::GetHealthPercent() const
+{
+    if (!HealthComp) return 0.f;
+    return HealthComp->GetHealthPercent();
+}
+
+float ATGBasePawn::GetShootDelayPercent() const
+{
+    if (!ShootComp) return 0.f;
+    return ShootComp->GetShootDelayPercent();
 }
 
 void ATGBasePawn::Tick(float DeltaSeconds)
@@ -65,6 +78,11 @@ void ATGBasePawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 
     InputComp->BindAction(Input_PrimaryAttack, ETriggerEvent::Triggered, this, &ATGBasePawn::PrimaryAttack);
     InputComp->BindAction(Input_Look, ETriggerEvent::Triggered, this, &ATGBasePawn::Look);
+}
+
+void ATGBasePawn::BeginPlay()
+{
+    Super::BeginPlay();
 }
 
 void ATGBasePawn::Look(const FInputActionValue& InputValue)

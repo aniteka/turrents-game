@@ -16,6 +16,8 @@ class TURRETSGAME_API UTGShootComponent : public UActorComponent
 public:
     UTGShootComponent();
 
+    float GetShootDelayPercent() const;
+
 public:
     UFUNCTION(BlueprintCallable, Category = "TG|Shoot")
     ATGProjectileBaseActor* ShootFromLocation(FVector Location, FVector ShootDirection);
