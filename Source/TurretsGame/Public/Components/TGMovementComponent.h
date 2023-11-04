@@ -40,6 +40,9 @@ protected:
     UPROPERTY(EditDefaultsOnly, Category = "TG|Movement|Engine Braking")
     float InterpSpeed = 0.25f;
 
+    UPROPERTY(EditDefaultsOnly, Category = "TG|Movement|Engine Braking")
+    float VelocityThreshold = 700.f;
+
     FTimerHandle ResetLastPowerInput;
 
     UPROPERTY(EditDefaultsOnly, Category = "TG|Movement|Engine Braking")
