@@ -30,6 +30,8 @@ void UTGMovementComponent::AddImpulseMovement(float DeltaTime)
 
     if (!HasGroundContact()) return;
 
+    if (GetPawnOwner()->GetVelocity().Size() >= VelocityThreshold) return;
+
     Power = FMath::Clamp(Power + GetLastPowerInput(), -PowerThreshold, PowerThreshold);
 
     UStaticMeshComponent* MyMeshComp = Cast<UStaticMeshComponent>(GetPawnOwner()->GetRootComponent());
