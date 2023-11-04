@@ -32,10 +32,11 @@ ATGBasePawn::ATGBasePawn()
     SpringArmComp->SetupAttachment(GetRootComponent());
 
     CameraComp = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComp"));
+    CameraComp->SetRelativeLocation(FVector(0.f, -300.f, 0.f));
     CameraComp->SetupAttachment(SpringArmComp);
 }
 
-void ATGBasePawn::Tick(float DeltaSeconds) 
+void ATGBasePawn::Tick(float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);
 
@@ -43,7 +44,7 @@ void ATGBasePawn::Tick(float DeltaSeconds)
     ChangeGunRotator();
 }
 
-void ATGBasePawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) 
+void ATGBasePawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
     Super::SetupPlayerInputComponent(PlayerInputComponent);
 
@@ -66,7 +67,7 @@ void ATGBasePawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
     InputComp->BindAction(Input_Look, ETriggerEvent::Triggered, this, &ATGBasePawn::Look);
 }
 
-void ATGBasePawn::Look(const FInputActionValue& InputValue) 
+void ATGBasePawn::Look(const FInputActionValue& InputValue)
 {
     const FVector2D Value = InputValue.Get<FVector2D>();
 

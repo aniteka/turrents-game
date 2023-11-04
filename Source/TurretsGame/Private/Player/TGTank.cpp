@@ -2,14 +2,11 @@
 
 #include "Player/TGTank.h"
 #include "EnhancedInputComponent.h"
-#include "EnhancedInputSubsystems.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "DrawDebugHelpers.h"
 #include "Components/BoxComponent.h"
-#include "Components/CapsuleComponent.h"
 #include "Components/TGMovementComponent.h"
-#include "Components/TGShootComponent.h"
 
 ATGTank::ATGTank()
 {

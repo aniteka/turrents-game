@@ -43,12 +43,14 @@ protected:
 public:
     UPROPERTY(BlueprintAssignable, Category = "Delegates")
     FOnDeathDelegate OnDeathDelegate;
+
     UPROPERTY(BlueprintAssignable, Category = "Delegates")
     FOnHpChangeDelegate OnHpChangeDelegate;
     
 private:
-    UPROPERTY(BlueprintSetter = SetHp, BlueprintGetter = GetHp, Category = "TG", meta = (AllowPrivateAccess = 1))
+    UPROPERTY(VisibleAnywhere, BlueprintSetter = SetHp, BlueprintGetter = GetHp, Category = "TG", meta = (AllowPrivateAccess = 1))
     float Hp = 0.f;
+
     UPROPERTY(BlueprintReadOnly, Category = "TG", meta = (AllowPrivateAccess = 1))
     bool bIsDead = false;
 

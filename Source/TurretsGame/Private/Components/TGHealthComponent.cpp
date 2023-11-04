@@ -51,10 +51,18 @@ void UTGHealthComponent::DeathCheck(float InHp)
     if (!GameMode) return;
 
     auto AIController = GetOwner()->GetInstigatorController<AAIController>();
-    if (!AIController) return;
+    if (AIController)
+    {
+        GameMode->EnemyDestroyed(GetOwner());
+        GetOwner()->Destroy();
+    }
+    else
+    {
+        auto Controller = GetOwner()->GetInstigatorController();
+        if (!Controller) return;
 
-    GameMode->EnemyDestroyed(GetOwner());
-    GetOwner()->Destroy();
+        GameMode->GameOver();
+    }
 }
 
 void UTGHealthComponent::OnTakeAnyDamageCallback(

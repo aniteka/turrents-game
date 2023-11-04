@@ -5,6 +5,7 @@
 #include "Player/TGPlayerController.h"
 #include "GameInstance/TGGameInstance.h"
 #include "UI/HUD/TG_HUD.h"
+#include "Kismet/GameplayStatics.h"
 
 ATGGameMode::ATGGameMode()
 {
@@ -13,7 +14,7 @@ ATGGameMode::ATGGameMode()
     HUDClass = ATG_HUD::StaticClass();
 }
 
-void ATGGameMode::InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage) 
+void ATGGameMode::InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage)
 {
     Super::InitGame(MapName, Options, ErrorMessage);
 
@@ -52,9 +53,21 @@ void ATGGameMode::EnemyDestroyed(AActor* EnemyToRemove)
     }
 }
 
+void ATGGameMode::GameOver()
+{
+    if (!GetTGGameInstance()) return;
+    UGameplayStatics::OpenLevel(this, GetTGGameInstance()->MenuMapName);
+}
+
 ATGPlayerController* ATGGameMode::GetTGPlayerController()
 {
-    return (!TGPlayerController) ? Cast<ATGPlayerController>(GetWorld()->GetFirstPlayerController()) : TGPlayerController;
+    return (!TGPlayerController) ? TGPlayerController = Cast<ATGPlayerController>(GetWorld()->GetFirstPlayerController())
+                                 : TGPlayerController;
+}
+
+UTGGameInstance* ATGGameMode::GetTGGameInstance()
+{
+    return (!TGGameInstance) ? TGGameInstance = GetGameInstance<UTGGameInstance>() : TGGameInstance;
 }
 
 bool ATGGameMode::IsAllEnemiesDestroyed()
@@ -64,6 +77,8 @@ bool ATGGameMode::IsAllEnemiesDestroyed()
 
 void ATGGameMode::SpawnPlayerByGameType()
 {
+    if (!GetTGPlayerController()) return;
+
     switch (GameType)
     {
         case EGameType::EGT_PlayTank: RestartPlayerAtTransform(GetTGPlayerController(), PlayerTankStartTransform); break;

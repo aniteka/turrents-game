@@ -79,37 +79,7 @@ float UTGShootComponent::GetRemainsOfShootDelay() const
 
 void UTGShootComponent::DrawCrosshair(USceneComponent* Component, FName Socket, FVector ShootDirection)
 {
-    FVector SocketWorldLocation;
-    FRotator SocketWorldRotation;
-    FVector Direction;
-
-    if (const auto MeshComponent = Cast<UStaticMeshComponent>(Component); Socket != NAME_None && MeshComponent)
-    {
-        MeshComponent->GetSocketWorldLocationAndRotation(Socket, SocketWorldLocation, SocketWorldRotation);
-        Direction = UKismetMathLibrary::GetForwardVector(SocketWorldRotation);
-    }
-
-    FHitResult HitPoint;
-    const FVector EndLineTrace = (SocketWorldLocation + Direction) * 1000.f;
-    GetWorld()->LineTraceSingleByChannel(HitPoint, SocketWorldLocation, EndLineTrace, ECC_Visibility);
-
-    if (!HitPoint.bBlockingHit) return;
-
-    FVector OutLaunchVelocity;
-    UGameplayStatics::SuggestProjectileVelocity(         //
-        this,                                            //
-        OutLaunchVelocity,                               //
-        SocketWorldLocation,                             //
-        HitPoint.ImpactPoint,                            //
-        ProjectileImpulseMultiplier,                     //
-        false,                                           //
-        0.f,                                             //
-        0.f,                                             //
-        ESuggestProjVelocityTraceOption::TraceFullPath,  //
-        FCollisionResponseParams::DefaultResponseParam,  //
-        TArray<AActor*>(),                               //
-        true                                             //
-    );
+    // TODO
 }
 
 void UTGShootComponent::ShootDelayCallback()

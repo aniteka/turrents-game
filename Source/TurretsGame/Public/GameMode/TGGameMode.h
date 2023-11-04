@@ -8,6 +8,7 @@
 #include "TGGameMode.generated.h"
 
 class ATGPlayerController;
+class UTGGameInstance;
 
 UCLASS()
 class TURRETSGAME_API ATGGameMode : public AGameMode
@@ -21,10 +22,14 @@ public:
     virtual void HandleStartingNewPlayer_Implementation(APlayerController* NewPlayer) override;
 
     void EnemyDestroyed(AActor* EnemyToRemove);
+    void GameOver();
 
-private:
+protected:
     UPROPERTY()
     ATGPlayerController* TGPlayerController;
+
+    UPROPERTY()
+    UTGGameInstance* TGGameInstance;
 
     UPROPERTY(EditDefaultsOnly, Category = "TG|GameMode properties")
     FTransform PlayerTankStartTransform;
@@ -55,6 +60,7 @@ private:
 
 private:
     ATGPlayerController* GetTGPlayerController();
+    UTGGameInstance* GetTGGameInstance();
     bool IsAllEnemiesDestroyed();
 
     void SpawnPlayerByGameType();

@@ -16,5 +16,8 @@ public:
     UPROPERTY(EditDefaultsOnly, Category = "TG|Game properties")
     FName BattleMapName = "MainMap";
 
+    UPROPERTY(EditDefaultsOnly, Category = "TG|Game properties")
+    FName MenuMapName = "MenuMap";
+
     EGameType ChoosedGameType = EGameType::EGT_PlayTank;
 };
