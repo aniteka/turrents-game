@@ -10,8 +10,9 @@
 class UCameraComponent;
 class USpringArmComponent;
 class UTGShootComponent;
+class UInputMappingContext;
 
-UCLASS(Abstract)
+UCLASS()
 class TURRETSGAME_API ATGBasePawn : public APawn
 {
     GENERATED_BODY()
@@ -37,13 +38,24 @@ protected:
 
 protected:
     UPROPERTY(EditDefaultsOnly, Category = "TG|Input")
+    UInputMappingContext* DefaultInputMapping;
+
+    UPROPERTY(EditDefaultsOnly, Category = "TG|Input")
+    UInputAction* Input_Look;
+
+    UPROPERTY(EditDefaultsOnly, Category = "TG|Input")
     UInputAction* Input_PrimaryAttack;
 
     UPROPERTY(EditDefaultsOnly, Category = "TG|Threshold", meta = (Units = "Degrees"))
     float GunPitchThreshold = 20.f;
-    
+
 protected:
-    virtual void PrimaryAttack() PURE_VIRTUAL(ATGBasePawn::PrimaryAttack, ;);
+    virtual void Tick(float DeltaSeconds) override;
+    virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+    void Look(const FInputActionValue& InputValue);
     virtual void ChangeTowerRotator();
     virtual void ChangeGunRotator();
+
+    virtual void PrimaryAttack();
 };

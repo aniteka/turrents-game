@@ -17,57 +17,28 @@ ATGTank::ATGTank()
 
     Foundation = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Foundation"));
     Foundation->SetSimulatePhysics(true);
+    Foundation->SetCollisionObjectType(ECC_Pawn);
     SetRootComponent(Foundation);
 
-    Tower = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Tower"));
     Tower->SetupAttachment(GetRootComponent());
-
-    Gun = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Gun"));
     Gun->SetupAttachment(Tower);
-
-    SpringArmComp = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArmComp"));
-    SpringArmComp->bUsePawnControlRotation = true;
     SpringArmComp->SetupAttachment(GetRootComponent());
-
-    CameraComp = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComp"));
     CameraComp->SetupAttachment(SpringArmComp);
-}
-
-void ATGTank::Tick(float DeltaSeconds)
-{
-    Super::Tick(DeltaSeconds);
-
-    ChangeTowerRotator();
-    ChangeGunRotator();
 }
 
 void ATGTank::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
     Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-    const APlayerController* PC = GetController<APlayerController>();
-    const ULocalPlayer* LP = PC->GetLocalPlayer();
-
-    UEnhancedInputLocalPlayerSubsystem* Subsystem = LP->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();
-    check(Subsystem);
-
-    Subsystem->ClearAllMappings();
-
-    Subsystem->AddMappingContext(DefaultInputMapping, 0);
-
     UEnhancedInputComponent* InputComp = Cast<UEnhancedInputComponent>(PlayerInputComponent);
-    InputComp->BindAction(Input_PrimaryAttack, ETriggerEvent::Triggered, this, &ATGTank::PrimaryAttack);
-    InputComp->BindAction(Input_Move, ETriggerEvent::Triggered, this, &ATGTank::Move);
-    InputComp->BindAction(Input_Look, ETriggerEvent::Triggered, this, &ATGTank::Look);
-}
+    if (!InputComp) return;
 
-void ATGTank::PrimaryAttack()
-{
-    ShootComp->ShootFromComponent(Gun);
+    InputComp->BindAction(Input_Move, ETriggerEvent::Triggered, this, &ATGTank::Move);
 }
 
 void ATGTank::Move(const FInputActionInstance& Instance)
 {
+    if (!Foundation) return;
     const FVector2D AxisValue = Instance.GetValue().Get<FVector2D>();
 
     if (AxisValue.X != 0.f)
@@ -87,23 +58,12 @@ void ATGTank::Move(const FInputActionInstance& Instance)
     }
 }
 
-void ATGTank::Look(const FInputActionValue& InputValue)
-{
-    const FVector2D Value = InputValue.Get<FVector2D>();
-
-    AddControllerYawInput(Value.X);
-    AddControllerPitchInput(Value.Y);
-}
-
 void ATGTank::ChangeTowerRotator()
 {
+    if (!Tower || !SpringArmComp || !Foundation) return;
+
     FRotator TowerRot = Tower->GetRelativeRotation();
     TowerRot.Yaw = SpringArmComp->GetTargetRotation().Yaw - Foundation->GetRelativeRotation().Yaw;
 
     Tower->SetRelativeRotation(TowerRot, true);
-}
-
-void ATGTank::ChangeGunRotator()
-{
-    Super::ChangeGunRotator();
 }

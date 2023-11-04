@@ -19,14 +19,10 @@ public:
     ATGTank();
 
 protected:
-    virtual void Tick(float DeltaSeconds) override;
     virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-    virtual void PrimaryAttack() override;
 
     void Move(const FInputActionInstance& Instance);
-    void Look(const FInputActionValue& InputValue);
     virtual void ChangeTowerRotator() override;
-    virtual void ChangeGunRotator() override;
 
 protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Components")
@@ -34,13 +30,7 @@ protected:
 
 protected:
     UPROPERTY(EditDefaultsOnly, Category = "TG|Input")
-    UInputMappingContext* DefaultInputMapping;
-
-    UPROPERTY(EditDefaultsOnly, Category = "TG|Input")
     UInputAction* Input_Move;
-
-    UPROPERTY(EditDefaultsOnly, Category = "TG|Input")
-    UInputAction* Input_Look;
 
     UPROPERTY(EditDefaultsOnly, Category = "TG|Distance")
     float TraceDistance = 1000.f;
