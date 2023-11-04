@@ -6,6 +6,7 @@
 #include "TGBasePawn.h"
 #include "TGTank.generated.h"
 
+class UTGMovementComponent;
 class UCameraComponent;
 class USpringArmComponent;
 class UInputMappingContext;
@@ -28,6 +29,9 @@ protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Components")
     UStaticMeshComponent* Foundation;
 
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Components")
+    UTGMovementComponent* MovementComp;
+
 protected:
     UPROPERTY(EditDefaultsOnly, Category = "TG|Input")
     UInputAction* Input_Move;
@@ -37,4 +41,5 @@ protected:
 
     UPROPERTY(EditDefaultsOnly, Category = "TG|Movement")
     float ForwardSpeed = 500.f;
+    
 };

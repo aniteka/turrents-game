@@ -7,6 +7,7 @@
 #include "Camera/CameraComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "Components/BoxComponent.h"
 
 ATGBasePawn::ATGBasePawn()
 {
@@ -14,6 +15,9 @@ ATGBasePawn::ATGBasePawn()
 
     ShootComp = CreateDefaultSubobject<UTGShootComponent>(TEXT("ShootComp"));
     HealthComp = CreateDefaultSubobject<UTGHealthComponent>(TEXT("HealthComp"));
+
+    BoxComp = CreateDefaultSubobject<UBoxComponent>(TEXT("CapsuleComp"));
+    BoxComp->SetupAttachment(GetRootComponent());
 
     Tower = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Tower"));
     Tower->SetCollisionObjectType(ECC_Pawn);
