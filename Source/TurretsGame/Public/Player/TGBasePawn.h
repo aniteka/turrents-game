@@ -7,6 +7,7 @@
 #include "InputAction.h"
 #include "TGBasePawn.generated.h"
 
+class UBoxComponent;
 class UCameraComponent;
 class USpringArmComponent;
 class UTGShootComponent;
@@ -35,6 +36,9 @@ protected:
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Components")
     UCameraComponent* CameraComp;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Components")
+    UBoxComponent* BoxComp;
 
 protected:
     UPROPERTY(EditDefaultsOnly, Category = "TG|Input")

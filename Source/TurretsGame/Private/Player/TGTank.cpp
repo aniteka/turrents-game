@@ -6,10 +6,10 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "DrawDebugHelpers.h"
+#include "Components/BoxComponent.h"
+#include "Components/CapsuleComponent.h"
+#include "Components/TGMovementComponent.h"
 #include "Components/TGShootComponent.h"
-
-static TAutoConsoleVariable<bool> CVarDebugDrawInteraction(TEXT("su.DebugDrawInteraction"),  //
-    false, TEXT("Enable Debug Lines for Change Rotation of Gun Component."), ECVF_Cheat);
 
 ATGTank::ATGTank()
 {
@@ -20,10 +20,13 @@ ATGTank::ATGTank()
     Foundation->SetCollisionObjectType(ECC_Pawn);
     SetRootComponent(Foundation);
 
+    BoxComp->SetupAttachment(GetRootComponent());
     Tower->SetupAttachment(GetRootComponent());
     Gun->SetupAttachment(Tower);
     SpringArmComp->SetupAttachment(GetRootComponent());
     CameraComp->SetupAttachment(SpringArmComp);
+
+    MovementComp = CreateDefaultSubobject<UTGMovementComponent>(TEXT("MovementComp"));
 }
 
 void ATGTank::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -41,7 +44,7 @@ void ATGTank::Move(const FInputActionInstance& Instance)
     if (!Foundation) return;
     const FVector2D AxisValue = Instance.GetValue().Get<FVector2D>();
 
-    if (AxisValue.X != 0.f)
+    if (AxisValue.X != 0.f && MovementComp->HasGroundContact())
     {
         FRotator CurrentRotation = Foundation->GetComponentRotation();
         FRotator NewRotation = CurrentRotation + FRotator(0.f, AxisValue.X, 0.f);
@@ -51,10 +54,7 @@ void ATGTank::Move(const FInputActionInstance& Instance)
 
     if (AxisValue.Y != 0.f)
     {
-        FVector ForwardVector = Foundation->GetForwardVector();
-        FVector MovementDirection = ForwardVector * AxisValue.Y;
-
-        Foundation->AddImpulse(MovementDirection * ForwardSpeed * GetWorld()->DeltaTimeSeconds, NAME_None, true);
+        MovementComp->AddImpulse(AxisValue.Y);
     }
 }
 

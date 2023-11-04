@@ -6,12 +6,16 @@
 #include "Camera/CameraComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "Components/BoxComponent.h"
 
 ATGBasePawn::ATGBasePawn()
 {
     PrimaryActorTick.bCanEverTick = true;
 
     ShootComp = CreateDefaultSubobject<UTGShootComponent>(TEXT("ShootComp"));
+
+    BoxComp = CreateDefaultSubobject<UBoxComponent>(TEXT("CapsuleComp"));
+    BoxComp->SetupAttachment(GetRootComponent());
 
     Tower = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Tower"));
     Tower->SetCollisionObjectType(ECC_Pawn);
