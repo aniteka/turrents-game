@@ -27,6 +27,9 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Movement")
     FORCEINLINE float GetPowerEngine() const { return Power; };
 
+    UFUNCTION(BlueprintCallable, Category = "Movement")
+    FORCEINLINE float GetPercentPower() const { return FMath::Clamp(GetPawnOwner()->GetVelocity().Size(), 0.f, VelocityThreshold) / VelocityThreshold; };
+
 protected:
     UPROPERTY(EditDefaultsOnly, Category = "TG|Movement")
     float PowerThreshold = 1.f;
