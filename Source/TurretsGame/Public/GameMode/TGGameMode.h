@@ -4,16 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameMode.h"
+#include "TurretGameTypes.h"
 #include "TGGameMode.generated.h"
 
 class ATGPlayerController;
-
-UENUM(BlueprintType)
-enum class EGameType : uint8
-{
-    EGT_PlayTank UMETA(DisplayName = "Play Tank"),
-    EGT_PlayTurret UMETA(DisplayName = "Play Turret")
-};
 
 UCLASS()
 class TURRETSGAME_API ATGGameMode : public AGameMode
@@ -23,6 +17,7 @@ class TURRETSGAME_API ATGGameMode : public AGameMode
 public:
     ATGGameMode();
 
+    virtual void InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage) override;
     virtual void HandleStartingNewPlayer_Implementation(APlayerController* NewPlayer) override;
 
     void EnemyDestroyed(AActor* EnemyToRemove);
@@ -42,6 +37,12 @@ private:
 
     UPROPERTY(EditDefaultsOnly, Category = "TG|GameMode properties")
     TArray<FTransform> EnemyTanksTransform;
+
+    UPROPERTY(EditDefaultsOnly, Category = "TG|GameMode properties")
+    TSubclassOf<AActor> PlayerTankClass;
+
+    UPROPERTY(EditDefaultsOnly, Category = "TG|GameMode properties")
+    TSubclassOf<AActor> PlayerTurretClass;
 
     UPROPERTY(EditDefaultsOnly, Category = "TG|GameMode properties")
     TSubclassOf<AActor> EnemyTankClass;

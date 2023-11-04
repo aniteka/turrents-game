@@ -3,11 +3,30 @@
 #include "GameMode/TGGameMode.h"
 #include "Player/TGTank.h"
 #include "Player/TGPlayerController.h"
+#include "GameInstance/TGGameInstance.h"
+#include "UI/HUD/TG_HUD.h"
 
 ATGGameMode::ATGGameMode()
 {
     DefaultPawnClass = ATGTank::StaticClass();
     PlayerControllerClass = ATGPlayerController::StaticClass();
+    HUDClass = ATG_HUD::StaticClass();
+}
+
+void ATGGameMode::InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage) 
+{
+    Super::InitGame(MapName, Options, ErrorMessage);
+
+    auto GameInstance = GetGameInstance<UTGGameInstance>();
+    if (!GameInstance) return;
+
+    GameType = GameInstance->ChoosedGameType;
+
+    switch (GameType)
+    {
+        case EGameType::EGT_PlayTank: DefaultPawnClass = PlayerTankClass; break;
+        case EGameType::EGT_PlayTurret: DefaultPawnClass = PlayerTurretClass; break;
+    }
 }
 
 void ATGGameMode::HandleStartingNewPlayer_Implementation(APlayerController* NewPlayer)
