@@ -29,12 +29,15 @@ public:
 
     UFUNCTION(BlueprintPure, Category = "TG|Shoot")
     bool CanShootNow() const;
-    
+
     UFUNCTION(BlueprintPure, Category = "TG|Shoot|Delay")
     bool IsShootDelay() const;
 
     UFUNCTION(BlueprintPure, Category = "TG|Shoot|Delay")
     float GetRemainsOfShootDelay() const;
+
+    // Crosshair
+    void DrawCrosshair(USceneComponent* Component, FName Socket = NAME_None, FVector ShootDirection = FVector::ZeroVector);
 
     FORCEINLINE TSubclassOf<ATGProjectileBaseActor> GetProjectileClass() const { return ProjectileClass; }
     FORCEINLINE void SetProjectileClass(TSubclassOf<ATGProjectileBaseActor> NewProjectileClass) { ProjectileClass = NewProjectileClass; }
@@ -71,13 +74,14 @@ protected:
     UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "TG|Delay", meta = (EditCondition = "bUseShootDelay", EditConditionHides))
     float ShootDelayInSec = 1.5f;
 
-    UPROPERTY(EditAnywhere, Category = "TG|Delay", DisplayName = "Use Deferred Shot?", meta = (EditCondition = "bUseShootDelay", EditConditionHides))
+    UPROPERTY(EditAnywhere, Category = "TG|Delay", DisplayName = "Use Deferred Shot?",
+        meta = (EditCondition = "bUseShootDelay", EditConditionHides))
     bool bUseDeferredShot = false;
 
     // -1 means use time from ShootDelayInSec
     UPROPERTY(EditAnywhere, Category = "TG|Delay", meta = (EditCondition = "bUseDeferredShot", EditConditionHides))
     float RemainingTimeForDeferredShot = -1.f;
-    
+
 private:
     struct FInfoForShoot
     {
@@ -90,9 +94,9 @@ private:
     FInfoForShoot AfterDelayInfo;
 
     void ShootDelayCallback();
-    
+
     /**
-     * @return true - can shoot | false - cant 
+     * @return true - can shoot | false - cant
      */
     bool PreShootCheck(const FInfoForShoot& Info);
     ATGProjectileBaseActor* ShootImplementation(const FInfoForShoot& Info);

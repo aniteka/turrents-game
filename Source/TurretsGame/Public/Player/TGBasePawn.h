@@ -10,6 +10,7 @@
 class UCameraComponent;
 class USpringArmComponent;
 class UTGShootComponent;
+class UTGHealthComponent;
 class UInputMappingContext;
 
 UCLASS()
@@ -23,6 +24,9 @@ public:
 protected:
     UPROPERTY(EditDefaultsOnly, Category = "Components")
     UTGShootComponent* ShootComp;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Components")
+    UTGHealthComponent* HealthComp;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Components")
     UStaticMeshComponent* Tower;

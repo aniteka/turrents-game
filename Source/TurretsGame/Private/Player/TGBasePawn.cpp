@@ -2,6 +2,7 @@
 
 #include "Player/TGBasePawn.h"
 #include "Components/TGShootComponent.h"
+#include "Components/TGHealthComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "EnhancedInputComponent.h"
@@ -12,6 +13,7 @@ ATGBasePawn::ATGBasePawn()
     PrimaryActorTick.bCanEverTick = true;
 
     ShootComp = CreateDefaultSubobject<UTGShootComponent>(TEXT("ShootComp"));
+    HealthComp = CreateDefaultSubobject<UTGHealthComponent>(TEXT("HealthComp"));
 
     Tower = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Tower"));
     Tower->SetCollisionObjectType(ECC_Pawn);
@@ -92,4 +94,5 @@ void ATGBasePawn::PrimaryAttack()
 {
     if (!ShootComp || !Gun) return;
     ShootComp->ShootFromComponent(Gun);
+    ShootComp->DrawCrosshair(Gun);
 }

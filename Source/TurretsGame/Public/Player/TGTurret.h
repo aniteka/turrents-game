@@ -15,10 +15,4 @@ public:
     ATGTurret();
 
     virtual void PostInitializeComponents() override;
-
-private:
-    UFUNCTION()
-    void OnTakePointDamageCallback(AActor* DamagedActor, float Damage, class AController* InstigatedBy, FVector HitLocation,
-        class UPrimitiveComponent* FHitComponent, FName BoneName, FVector ShotFromDirection, const class UDamageType* DamageType,
-        AActor* DamageCauser);
 };

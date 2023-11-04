@@ -6,7 +6,7 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 
-ATGTurret::ATGTurret() 
+ATGTurret::ATGTurret()
 {
     SetRootComponent(Tower);
     Gun->SetupAttachment(Tower);
@@ -17,18 +17,4 @@ ATGTurret::ATGTurret()
 void ATGTurret::PostInitializeComponents()
 {
     Super::PostInitializeComponents();
-
-    OnTakePointDamage.AddDynamic(this, &ATGTurret::OnTakePointDamageCallback);
-}
-
-void ATGTurret::OnTakePointDamageCallback(AActor* DamagedActor, float Damage, AController* InstigatedBy, FVector HitLocation,
-    UPrimitiveComponent* FHitComponent, FName BoneName, FVector ShotFromDirection, const UDamageType* DamageType, AActor* DamageCauser)
-{
-    if (!GetWorld()) return;
-
-    auto GameMode = Cast<ATGGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
-    if (!GameMode) return;
-
-    GameMode->EnemyDestroyed(this);
-    Destroy();
 }

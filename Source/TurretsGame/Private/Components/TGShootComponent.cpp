@@ -3,6 +3,7 @@
 #include "Components/TGShootComponent.h"
 
 #include "Kismet/KismetMathLibrary.h"
+#include "Kismet/GameplayStatics.h"
 #include "Projectiles/TGProjectileBaseActor.h"
 
 UTGShootComponent::UTGShootComponent()
@@ -76,6 +77,41 @@ float UTGShootComponent::GetRemainsOfShootDelay() const
     return GetWorld()->GetTimerManager().GetTimerRemaining(ShootDelayTimerHandle);
 }
 
+void UTGShootComponent::DrawCrosshair(USceneComponent* Component, FName Socket, FVector ShootDirection)
+{
+    FVector SocketWorldLocation;
+    FRotator SocketWorldRotation;
+    FVector Direction;
+
+    if (const auto MeshComponent = Cast<UStaticMeshComponent>(Component); Socket != NAME_None && MeshComponent)
+    {
+        MeshComponent->GetSocketWorldLocationAndRotation(Socket, SocketWorldLocation, SocketWorldRotation);
+        Direction = UKismetMathLibrary::GetForwardVector(SocketWorldRotation);
+    }
+
+    FHitResult HitPoint;
+    const FVector EndLineTrace = (SocketWorldLocation + Direction) * 1000.f;
+    GetWorld()->LineTraceSingleByChannel(HitPoint, SocketWorldLocation, EndLineTrace, ECC_Visibility);
+
+    if (!HitPoint.bBlockingHit) return;
+
+    FVector OutLaunchVelocity;
+    UGameplayStatics::SuggestProjectileVelocity(         //
+        this,                                            //
+        OutLaunchVelocity,                               //
+        SocketWorldLocation,                             //
+        HitPoint.ImpactPoint,                            //
+        ProjectileImpulseMultiplier,                     //
+        false,                                           //
+        0.f,                                             //
+        0.f,                                             //
+        ESuggestProjVelocityTraceOption::TraceFullPath,  //
+        FCollisionResponseParams::DefaultResponseParam,  //
+        TArray<AActor*>(),                               //
+        true                                             //
+    );
+}
+
 void UTGShootComponent::ShootDelayCallback()
 {
     GetWorld()->GetTimerManager().ClearTimer(ShootDelayTimerHandle);
@@ -112,8 +148,7 @@ bool UTGShootComponent::PreShootCheck(const FInfoForShoot& Info)
 
 ATGProjectileBaseActor* UTGShootComponent::ShootImplementation(const UTGShootComponent::FInfoForShoot& Info)
 {
-    if (!PreShootCheck(Info))
-        return nullptr;
+    if (!PreShootCheck(Info)) return nullptr;
 
     FActorSpawnParameters SpawnParameters;
     SpawnParameters.Instigator = GetOwner<APawn>();

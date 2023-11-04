@@ -1,12 +1,13 @@
 // TurretGame by Team #1. AlphaNova courses
 
-
 #include "Components/TGHealthComponent.h"
+#include "GameMode/TGGameMode.h"
+#include "Kismet/GameplayStatics.h"
+#include "AIController.h"
 
 UTGHealthComponent::UTGHealthComponent()
 {
     PrimaryComponentTick.bCanEverTick = true;
-
 }
 
 void UTGHealthComponent::PostInitProperties()
@@ -20,7 +21,10 @@ void UTGHealthComponent::BeginPlay()
 {
     Super::BeginPlay();
 
-    GetOwner()->OnTakeAnyDamage.AddDynamic(this, &UTGHealthComponent::OnTakeAnyDamageCallback);
+    if (GetOwner())
+    {
+        GetOwner()->OnTakeAnyDamage.AddDynamic(this, &UTGHealthComponent::OnTakeAnyDamageCallback);
+    }
 }
 
 void UTGHealthComponent::SetHp(float NewHp)
@@ -38,15 +42,23 @@ void UTGHealthComponent::AddDeltaToHp(float Delta)
 
 void UTGHealthComponent::DeathCheck(float InHp)
 {
-    if (Hp != 0.f)
-        return;
+    if (!FMath::IsNearlyZero(Hp) || !GetWorld() || !GetOwner()) return;
 
     bIsDead = true;
     OnDeathDelegate.Broadcast(GetOwner());
+
+    auto GameMode = Cast<ATGGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
+    if (!GameMode) return;
+
+    auto AIController = GetOwner()->GetInstigatorController<AAIController>();
+    if (!AIController) return;
+
+    GameMode->EnemyDestroyed(GetOwner());
+    GetOwner()->Destroy();
 }
 
-void UTGHealthComponent::OnTakeAnyDamageCallback(AActor* DamagedActor, float Damage, const UDamageType* DamageType,
-    AController* InstigatedBy, AActor* DamageCauser)
+void UTGHealthComponent::OnTakeAnyDamageCallback(
+    AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
 {
     AddDeltaToHp(-Damage);
 }
