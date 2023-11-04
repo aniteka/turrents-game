@@ -9,7 +9,9 @@
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnDeathDelegate, AActor*, Actor);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnHpChangeDelegate, AActor*, Actor, float, NewHp, float, Delta);
 
-UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
+class ATGPlayerController;
+
+UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class TURRETSGAME_API UTGHealthComponent : public UActorComponent
 {
     GENERATED_BODY()
@@ -17,8 +19,9 @@ class TURRETSGAME_API UTGHealthComponent : public UActorComponent
 public:
     UTGHealthComponent();
 
+    float GetHealthPercent() const;
+
 protected:
-    virtual void PostInitProperties() override;
     virtual void BeginPlay() override;
 
 public:
@@ -46,18 +49,23 @@ public:
 
     UPROPERTY(BlueprintAssignable, Category = "Delegates")
     FOnHpChangeDelegate OnHpChangeDelegate;
-    
+
 private:
-    UPROPERTY(VisibleAnywhere, BlueprintSetter = SetHp, BlueprintGetter = GetHp, Category = "TG", meta = (AllowPrivateAccess = 1))
+    UPROPERTY(EditAnywhere, BlueprintSetter = SetHp, BlueprintGetter = GetHp, Category = "TG", meta = (AllowPrivateAccess = 1))
     float Hp = 0.f;
 
     UPROPERTY(BlueprintReadOnly, Category = "TG", meta = (AllowPrivateAccess = 1))
     bool bIsDead = false;
 
+    UPROPERTY()
+    ATGPlayerController* TGPlayerController;
+
 private:
     void DeathCheck(float InHp);
 
+    void UpdateHUD();
+
     UFUNCTION()
-    void OnTakeAnyDamageCallback(AActor* DamagedActor, float Damage, const class UDamageType* DamageType, class AController* InstigatedBy,
-        AActor* DamageCauser);
+    void OnTakeAnyDamageCallback(
+        AActor* DamagedActor, float Damage, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
 };

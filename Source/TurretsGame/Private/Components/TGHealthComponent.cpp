@@ -4,17 +4,11 @@
 #include "GameMode/TGGameMode.h"
 #include "Kismet/GameplayStatics.h"
 #include "AIController.h"
+#include "Player/TGPlayerController.h"
 
 UTGHealthComponent::UTGHealthComponent()
 {
     PrimaryComponentTick.bCanEverTick = true;
-}
-
-void UTGHealthComponent::PostInitProperties()
-{
-    Super::PostInitProperties();
-
-    Hp = MaxHp;
 }
 
 void UTGHealthComponent::BeginPlay()
@@ -25,13 +19,19 @@ void UTGHealthComponent::BeginPlay()
     {
         GetOwner()->OnTakeAnyDamage.AddDynamic(this, &UTGHealthComponent::OnTakeAnyDamageCallback);
     }
+
+    SetHp(MaxHp);
 }
 
 void UTGHealthComponent::SetHp(float NewHp)
 {
+    if (!GetOwner()) return;
+
     const auto OldHp = Hp;
     Hp = FMath::Clamp(NewHp, 0.f, MaxHp);
     OnHpChangeDelegate.Broadcast(GetOwner(), Hp, Hp - OldHp);
+
+    UpdateHUD();
     DeathCheck(Hp);
 }
 
@@ -63,6 +63,24 @@ void UTGHealthComponent::DeathCheck(float InHp)
 
         GameMode->GameOver();
     }
+}
+
+void UTGHealthComponent::UpdateHUD()
+{
+    if (!GetOwner()) return;
+
+    auto Pawn = Cast<APawn>(GetOwner());
+    if (!Pawn) return;
+
+    TGPlayerController = (!TGPlayerController) ? Pawn->GetController<ATGPlayerController>() : TGPlayerController;
+    if (!TGPlayerController) return;
+
+    TGPlayerController->SetPercentHealthBar(GetHealthPercent());
+}
+
+float UTGHealthComponent::GetHealthPercent() const
+{
+    return Hp / MaxHp;
 }
 
 void UTGHealthComponent::OnTakeAnyDamageCallback(
