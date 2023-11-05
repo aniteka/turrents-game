@@ -3,6 +3,7 @@
 
 #include "AI/TG_AIController.h"
 
+#include "AI/TG_AITeams.h"
 #include "Components/TGShootComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
@@ -17,10 +18,23 @@ ATG_AIController::ATG_AIController()
     GetRootComponent()->SetUsingAbsoluteRotation(false);
 }
 
+ETeamAttitude::Type ATG_AIController::GetTeamAttitudeTowards(const AActor& Other) const
+{
+    if (const APawn* OtherPawn = Cast<APawn>(&Other))
+    {
+        if (const IGenericTeamAgentInterface* TeamAgent = Cast<IGenericTeamAgentInterface>(OtherPawn->GetController()))
+        {
+            return Super::GetTeamAttitudeTowards(*OtherPawn->GetController());
+        }
+    }
+    return Super::GetTeamAttitudeTowards(Other);
+}
+
 void ATG_AIController::OnPossess(APawn* InPawn)
 {
     Super::OnPossess(InPawn);
 
+    SetGenericTeamId(TGTeamId::EnemyId);
     BasePawn = Cast<ATGBasePawn>(InPawn);
     GetPerceptionComponent()->OnTargetPerceptionInfoUpdated.AddDynamic(this, &ATG_AIController::PerceptionUpdatedCallback);
 }
@@ -29,6 +43,7 @@ void ATG_AIController::OnUnPossess()
 {
     Super::OnUnPossess();
 
+    SetGenericTeamId(FGenericTeamId::NoTeam);
     GetPerceptionComponent()->OnTargetPerceptionInfoUpdated.Clear();
     BasePawn = nullptr;
 }
