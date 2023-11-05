@@ -19,10 +19,11 @@ public:
     ATGTank();
 
     float GetSpeedPercent() const;
+    
+    bool IsPawnHidden() const { return PawnVisibility == EGameplayVisibility::EPGS_Hidden; };
+    bool IsPawnVisible() const { return PawnVisibility == EGameplayVisibility::EPGS_Visible; };
 
     virtual void PostInitializeComponents() override;
-
-    virtual void Tick(float DeltaSeconds) override;
 
 protected:
     virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;

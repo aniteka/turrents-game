@@ -39,13 +39,6 @@ void ATGTank::PostInitializeComponents()
     BushCollisionBox->OnComponentEndOverlap.AddDynamic(this, &ATGTank::OnBushCollisionEndOverlap);
 }
 
-void ATGTank::Tick(float DeltaSeconds)
-{
-    Super::Tick(DeltaSeconds);
-
-    UE_LOG(LogTemp, Log, TEXT("%s"), PawnVisibility == EGameplayVisibility::EPGS_Visible ? TEXT("Visible") : TEXT("Hidden"));
-}
-
 void ATGTank::OnBushCollisionBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
     int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
