@@ -18,17 +18,21 @@ public:
     ATG_AIController();
 
     virtual UAIPerceptionComponent* GetPerceptionComponent() override { return TGPerceptionComponent; };
-    
+
 protected:
     virtual void OnPossess(APawn* InPawn) override;
     virtual void OnUnPossess() override;
 
     virtual void UpdateControlRotation(float DeltaTime, bool bUpdatePawn) override;
-    
+
 protected:
     UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Components")
     UAIPerceptionComponent* TGPerceptionComponent;
-    
+
+protected:
+    UPROPERTY(EditAnywhere, Category = "TG")
+    float GunRotationInterpSpeed = 30.f;
+
 private:
     UFUNCTION()
     void PerceptionUpdatedCallback(const FActorPerceptionUpdateInfo& UpdateInfo);
@@ -36,7 +40,7 @@ private:
     void PawnStartShooting();
     void PawnEndShooting();
     void ShootingCallback();
-    
+
     ATGBasePawn* BasePawn = nullptr;
     FTimerHandle ShootingTimerHandle;
 };

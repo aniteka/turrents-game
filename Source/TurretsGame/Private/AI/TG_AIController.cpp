@@ -5,6 +5,7 @@
 
 #include "Components/TGShootComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "Perception/AIPerceptionComponent.h"
 #include "Player/TGBasePawn.h"
 
@@ -34,18 +35,17 @@ void ATG_AIController::OnUnPossess()
 
 void ATG_AIController::UpdateControlRotation(float DeltaTime, bool bUpdatePawn)
 {
-    if(GetFocusActor() == nullptr)
-    {
-        Super::UpdateControlRotation(DeltaTime, bUpdatePawn);
-        return;
-    }
     if (!IsValid(BasePawn)) return;
-    
+
     FVector Dir;
     UGameplayStatics::SuggestProjectileVelocity(GetWorld(), Dir, BasePawn->GetActorLocation(),
-        GetFocusActor()->GetActorLocation(), BasePawn->GetShootComponent()->GetInitialProjectileSpeed(), false,
-            0, 0, ESuggestProjVelocityTraceOption::DoNotTrace);
-    const auto NewControlRotation = Dir.GetSafeNormal().Rotation();
+        GetFocalPoint(), BasePawn->GetShootComponent()->GetInitialProjectileSpeed(), false,
+        0, 0, ESuggestProjVelocityTraceOption::DoNotTrace);
+
+    const auto OldControlRotation = GetControlRotation();
+    const auto TargetControlRotation = Dir.GetSafeNormal().Rotation();
+    const auto NewControlRotation = UKismetMathLibrary::RInterpTo_Constant(OldControlRotation, TargetControlRotation, DeltaTime,
+        GunRotationInterpSpeed);
 
     SetControlRotation(NewControlRotation);
 }
