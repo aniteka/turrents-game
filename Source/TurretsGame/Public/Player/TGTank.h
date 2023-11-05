@@ -7,9 +7,7 @@
 #include "TGTank.generated.h"
 
 class UTGMovementComponent;
-class UCameraComponent;
-class USpringArmComponent;
-class UInputMappingContext;
+class UBoxComponent;
 
 UCLASS()
 class TURRETSGAME_API ATGTank : public ATGBasePawn
@@ -18,6 +16,8 @@ class TURRETSGAME_API ATGTank : public ATGBasePawn
 
 public:
     ATGTank();
+
+    float GetSpeedPercent() const;
 
 protected:
     virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
@@ -32,14 +32,19 @@ protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Components")
     UTGMovementComponent* MovementComp;
 
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Components")
+    UBoxComponent* BushCollisionBox;
+
 protected:
     UPROPERTY(EditDefaultsOnly, Category = "TG|Input")
     UInputAction* Input_Move;
 
-    UPROPERTY(EditDefaultsOnly, Category = "TG|Distance")
-    float TraceDistance = 1000.f;
+    UPROPERTY(EditDefaultsOnly, Category = "TG|Movement")
+    float SidewaysSpeed = 1000.f;
 
     UPROPERTY(EditDefaultsOnly, Category = "TG|Movement")
-    float ForwardSpeed = 500.f;
-    
+    FName ForwardSocketName = FName(TEXT("ForwardPowerPoint"));
+
+    UPROPERTY(EditDefaultsOnly, Category = "TG|Movement")
+    FName BackwardSocketName = FName(TEXT("BackwardPowerPoint"));
 };

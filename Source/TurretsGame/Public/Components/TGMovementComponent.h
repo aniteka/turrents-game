@@ -23,8 +23,12 @@ public:
 
     virtual bool HasGroundContact() const;
 
+    /** Returned percent, 0 -> 1 moving forward, 0 -> -1 moving back */
     UFUNCTION(BlueprintCallable, Category = "Movement")
     FORCEINLINE float GetPowerEngine() const { return Power; };
+
+    UFUNCTION(BlueprintCallable, Category = "Movement")
+    FORCEINLINE float GetPercentPower() const { return FMath::Clamp(GetPawnOwner()->GetVelocity().Size(), 0.f, VelocityThreshold) / VelocityThreshold; };
 
 protected:
     UPROPERTY(EditDefaultsOnly, Category = "TG|Movement")
@@ -39,6 +43,9 @@ protected:
 
     UPROPERTY(EditDefaultsOnly, Category = "TG|Movement|Engine Braking")
     float InterpSpeed = 0.25f;
+
+    UPROPERTY(EditDefaultsOnly, Category = "TG|Movement|Engine Braking")
+    float VelocityThreshold = 700.f;
 
     FTimerHandle ResetLastPowerInput;
 

@@ -25,6 +25,9 @@ public:
     FORCEINLINE UTGShootComponent* GetShootComponent() const { return ShootComp; }
     FORCEINLINE UTGHealthComponent* GetHealthComponent() const { return HealthComp; }
     virtual void PrimaryAttack();
+    virtual float GetHealthPercent() const;
+    virtual float GetShootDelayPercent() const;
+    virtual float GetSpeedPercent() const { return 0.f; };
 
 protected:
     UPROPERTY(EditDefaultsOnly, Category = "Components")
@@ -46,7 +49,7 @@ protected:
     UCameraComponent* CameraComp;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Components")
-    UBoxComponent* BoxComp;
+    UBoxComponent* GroundBoxComp;
 
 protected:
     UPROPERTY(EditDefaultsOnly, Category = "TG|Input")
@@ -64,6 +67,7 @@ protected:
 protected:
     virtual void Tick(float DeltaSeconds) override;
     virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+    virtual void BeginPlay() override;
 
     void Look(const FInputActionValue& InputValue);
     virtual void ChangeTowerRotator();

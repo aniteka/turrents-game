@@ -52,6 +52,8 @@ public:
     FORCEINLINE float GetShootDelayInSec() const { return ShootDelayInSec; }
     FORCEINLINE void SetShootDelayInSec(float NewShootDelayInSec) { ShootDelayInSec = NewShootDelayInSec; }
 
+    float GetShootDelayPercent() const;
+    
 protected:
     UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "TG")
     TSubclassOf<ATGProjectileBaseActor> ProjectileClass;

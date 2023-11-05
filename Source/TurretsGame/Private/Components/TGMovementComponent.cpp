@@ -1,6 +1,5 @@
 // TurretGame by Team #1. AlphaNova courses
 
-
 #include "Components/TGMovementComponent.h"
 
 #include "Components/BoxComponent.h"
@@ -29,6 +28,8 @@ void UTGMovementComponent::AddImpulseMovement(float DeltaTime)
     }
 
     if (!HasGroundContact()) return;
+
+    if (GetPawnOwner()->GetVelocity().Size() >= VelocityThreshold) return;
 
     Power = FMath::Clamp(Power + GetLastPowerInput(), -PowerThreshold, PowerThreshold);
 
@@ -66,11 +67,10 @@ void UTGMovementComponent::AddImpulse(float PowerInput)
 
     LastPowerInput = PowerEngineInput;
 
-    if (GetWorldTimerManager().IsTimerActive(ResetLastPowerInput))
-        GetWorldTimerManager().ClearTimer(ResetLastPowerInput);
+    if (GetWorldTimerManager().IsTimerActive(ResetLastPowerInput)) GetWorldTimerManager().ClearTimer(ResetLastPowerInput);
 
-    GetWorldTimerManager().SetTimer(ResetLastPowerInput, this, &UTGMovementComponent::ResetLastPowerInput_Elapsed,
-        DelayResetLastPowerInput);
+    GetWorldTimerManager().SetTimer(
+        ResetLastPowerInput, this, &UTGMovementComponent::ResetLastPowerInput_Elapsed, DelayResetLastPowerInput);
 }
 
 bool UTGMovementComponent::HasGroundContact() const
@@ -90,14 +90,7 @@ bool UTGMovementComponent::HasGroundContact() const
 
     FHitResult Hit;
     bool bHit = GetWorld()->SweepSingleByChannel(
-        Hit,
-        Start,
-        End,
-        FQuat::Identity,
-        ECC_Visibility,
-        FCollisionShape::MakeBox(BoxComp->GetScaledBoxExtent()),
-        QueryParams
-        );
+        Hit, Start, End, FQuat::Identity, ECC_Visibility, FCollisionShape::MakeBox(BoxComp->GetScaledBoxExtent()), QueryParams);
 
     return bHit;
 }

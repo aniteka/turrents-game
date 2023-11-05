@@ -1,13 +1,14 @@
 // TurretGame by Team #1. AlphaNova courses
 
 #include "Player/TGBasePawn.h"
+#include "Player/TGPlayerController.h"
 #include "Components/TGShootComponent.h"
 #include "Components/TGHealthComponent.h"
+#include "Components/BoxComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
-#include "Components/BoxComponent.h"
 
 ATGBasePawn::ATGBasePawn()
 {
@@ -16,8 +17,8 @@ ATGBasePawn::ATGBasePawn()
     ShootComp = CreateDefaultSubobject<UTGShootComponent>(TEXT("ShootComp"));
     HealthComp = CreateDefaultSubobject<UTGHealthComponent>(TEXT("HealthComp"));
 
-    BoxComp = CreateDefaultSubobject<UBoxComponent>(TEXT("CapsuleComp"));
-    BoxComp->SetupAttachment(GetRootComponent());
+    GroundBoxComp = CreateDefaultSubobject<UBoxComponent>(TEXT("GroundBoxComp"));
+    GroundBoxComp->SetupAttachment(GetRootComponent());
 
     Tower = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Tower"));
     Tower->SetCollisionObjectType(ECC_Pawn);
@@ -34,6 +35,18 @@ ATGBasePawn::ATGBasePawn()
     CameraComp = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComp"));
     CameraComp->SetRelativeLocation(FVector(0.f, -300.f, 0.f));
     CameraComp->SetupAttachment(SpringArmComp);
+}
+
+float ATGBasePawn::GetHealthPercent() const
+{
+    if (!HealthComp) return 0.f;
+    return HealthComp->GetHealthPercent();
+}
+
+float ATGBasePawn::GetShootDelayPercent() const
+{
+    if (!ShootComp) return 0.f;
+    return ShootComp->GetShootDelayPercent();
 }
 
 void ATGBasePawn::Tick(float DeltaSeconds)
@@ -67,6 +80,11 @@ void ATGBasePawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
     InputComp->BindAction(Input_Look, ETriggerEvent::Triggered, this, &ATGBasePawn::Look);
 }
 
+void ATGBasePawn::BeginPlay()
+{
+    Super::BeginPlay();
+}
+
 void ATGBasePawn::Look(const FInputActionValue& InputValue)
 {
     const FVector2D Value = InputValue.Get<FVector2D>();
@@ -98,6 +116,6 @@ void ATGBasePawn::ChangeGunRotator()
 void ATGBasePawn::PrimaryAttack()
 {
     if (!ShootComp || !Gun) return;
-    ShootComp->ShootFromComponent(Gun);
+    ShootComp->ShootFromComponent(Gun, FName(TEXT("ShootSocket")));
     ShootComp->DrawCrosshair(Gun);
 }
