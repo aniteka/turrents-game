@@ -8,6 +8,10 @@
 
 class UTGMovementComponent;
 class UBoxComponent;
+class UNiagaraSystem;
+class UNiagaraComponent;
+class USoundCue;
+class UAudioComponent;
 
 UCLASS()
 class TURRETSGAME_API ATGTank : public ATGBasePawn
@@ -17,12 +21,15 @@ class TURRETSGAME_API ATGTank : public ATGBasePawn
 public:
     ATGTank();
 
+    virtual void BeginPlay() override;
+
     float GetSpeedPercent() const;
 
 protected:
     virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
     void Move(const FInputActionInstance& Instance);
+    void StopMove(const FInputActionInstance& Instance);
     virtual void ChangeTowerRotator() override;
 
 protected:
@@ -47,4 +54,35 @@ protected:
 
     UPROPERTY(EditDefaultsOnly, Category = "TG|Movement")
     FName BackwardSocketName = FName(TEXT("BackwardPowerPoint"));
+
+    UPROPERTY(EditDefaultsOnly, Category = "TG|Sound")
+    USoundCue* IdleSound;
+
+    UPROPERTY(EditDefaultsOnly, Category = "TG|Sound")
+    USoundCue* StartMoveSound;
+
+    UPROPERTY(EditDefaultsOnly, Category = "TG|Sound")
+    USoundCue* MoveSound;
+
+    UPROPERTY()
+    UAudioComponent* IdleSoundComponent;
+
+    UPROPERTY()
+    UAudioComponent* StartMoveSoundComponent;
+
+    UPROPERTY()
+    UAudioComponent* MoveSoundComponent;
+
+    UPROPERTY(EditDefaultsOnly, Category = "TG|VFX")
+    UNiagaraSystem* RoadSmokeSystem;
+
+    UPROPERTY()
+    UNiagaraComponent* RoadSmokeComponent;
+
+private:
+    void ActivateRoadSmokeSystem();
+    void DeactivateRoadSmokeSystem();
+
+    void PlayIdleSound();
+    void PlayStartMoveSound();
 };
