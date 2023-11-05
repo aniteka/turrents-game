@@ -8,7 +8,7 @@ enum class EGameType : uint8
 };
 
 UENUM(BlueprintType)
-enum class EPawnGameplayState : uint8
+enum class EGameplayVisibility : uint8
 {
     /** Pawn Hidden in a Bush */
     EPGS_Hidden UMETA(DisplayName = "Hidden"),

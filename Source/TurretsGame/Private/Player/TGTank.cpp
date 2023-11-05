@@ -7,6 +7,7 @@
 #include "DrawDebugHelpers.h"
 #include "Components/BoxComponent.h"
 #include "Components/TGMovementComponent.h"
+#include "Gameplay/TGBushStealth.h"
 
 ATGTank::ATGTank()
 {
@@ -28,6 +29,42 @@ ATGTank::ATGTank()
     CameraComp->SetupAttachment(SpringArmComp);
 
     MovementComp = CreateDefaultSubobject<UTGMovementComponent>(TEXT("MovementComp"));
+}
+
+void ATGTank::PostInitializeComponents()
+{
+    Super::PostInitializeComponents();
+
+    BushCollisionBox->OnComponentBeginOverlap.AddDynamic(this, &ATGTank::OnBushCollisionBeginOverlap);
+    BushCollisionBox->OnComponentEndOverlap.AddDynamic(this, &ATGTank::OnBushCollisionEndOverlap);
+}
+
+void ATGTank::Tick(float DeltaSeconds)
+{
+    Super::Tick(DeltaSeconds);
+
+    UE_LOG(LogTemp, Log, TEXT("%s"), PawnVisibility == EGameplayVisibility::EPGS_Visible ? TEXT("Visible") : TEXT("Hidden"));
+}
+
+void ATGTank::OnBushCollisionBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
+    int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+    SetPawnVisibility(OtherActor, EGameplayVisibility::EPGS_Hidden);
+}
+
+void ATGTank::OnBushCollisionEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
+    int32 OtherBodyIndex)
+{
+    SetPawnVisibility(OtherActor, EGameplayVisibility::EPGS_Visible);
+}
+
+void ATGTank::SetPawnVisibility(AActor* OtherActor, EGameplayVisibility VisibilityState)
+{
+    if (!OtherActor) return;
+
+    if (!OtherActor->IsA(ATGBushStealth::StaticClass())) return;
+
+    PawnVisibility = VisibilityState;
 }
 
 void ATGTank::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
