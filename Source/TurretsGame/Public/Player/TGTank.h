@@ -38,13 +38,4 @@ protected:
 protected:
     UPROPERTY(EditDefaultsOnly, Category = "TG|Input")
     UInputAction* Input_Move;
-
-    UPROPERTY(EditDefaultsOnly, Category = "TG|Movement")
-    float SidewaysSpeed = 1000.f;
-
-    UPROPERTY(EditDefaultsOnly, Category = "TG|Movement")
-    FName ForwardSocketName = FName(TEXT("ForwardPowerPoint"));
-
-    UPROPERTY(EditDefaultsOnly, Category = "TG|Movement")
-    FName BackwardSocketName = FName(TEXT("BackwardPowerPoint"));
 };

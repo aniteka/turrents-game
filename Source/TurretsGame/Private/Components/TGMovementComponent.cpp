@@ -62,8 +62,8 @@ void UTGMovementComponent::ResetLastPowerInput_Elapsed()
 
 void UTGMovementComponent::AddImpulse(float PowerInput)
 {
-    constexpr float ConvertToPercent = 100.f;
-    const float PowerEngineInput = PowerInput / ConvertToPercent;
+    constexpr float ConvertPercentToValue = 100.f;
+    const float PowerEngineInput = PowerInput / ConvertPercentToValue;
 
     LastPowerInput = PowerEngineInput;
 
@@ -71,6 +71,23 @@ void UTGMovementComponent::AddImpulse(float PowerInput)
 
     GetWorldTimerManager().SetTimer(
         ResetLastPowerInput, this, &UTGMovementComponent::ResetLastPowerInput_Elapsed, DelayResetLastPowerInput);
+}
+
+void UTGMovementComponent::AddImpulseRotate(float PowerInput)
+{
+    if (!HasGroundContact() || FMath::IsNearlyZero(GetPowerEngine())) return;
+
+    UStaticMeshComponent* MyMeshComp = Cast<UStaticMeshComponent>(GetPawnOwner()->GetRootComponent());
+    if (!MyMeshComp) return;
+
+    // Invert value to correct working with socket settings, when object moving forward or backward
+    PowerInput *= Power > 0 ? -1 : 1;
+
+    const FVector ForwardSocketDirection = MyMeshComp->GetSocketRotation(ForwardSocketName).Vector() * PowerInput;
+    const FVector BackwardSocketDirection = MyMeshComp->GetSocketRotation(BackwardSocketName).Vector() * PowerInput;
+    
+    MyMeshComp->AddImpulseAtLocation(ForwardSocketDirection * SidewaysSpeed, MyMeshComp->GetSocketLocation(ForwardSocketName));
+    MyMeshComp->AddImpulseAtLocation(BackwardSocketDirection * SidewaysSpeed, MyMeshComp->GetSocketLocation(BackwardSocketName));
 }
 
 bool UTGMovementComponent::HasGroundContact() const

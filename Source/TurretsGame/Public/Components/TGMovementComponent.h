@@ -21,6 +21,12 @@ public:
      */
     void AddImpulse(float PowerInput);
 
+    /**
+    * Rotate object when power != 0
+    * @param PowerInput Expected Value from Key Input [-1.0, 1.0]
+    */
+    void AddImpulseRotate(float PowerInput);
+
     virtual bool HasGroundContact() const;
 
     /** Returned percent, 0 -> 1 moving forward, 0 -> -1 moving back */
@@ -28,7 +34,10 @@ public:
     FORCEINLINE float GetPowerEngine() const { return Power; };
 
     UFUNCTION(BlueprintCallable, Category = "Movement")
-    FORCEINLINE float GetPercentPower() const { return FMath::Clamp(GetPawnOwner()->GetVelocity().Size(), 0.f, VelocityThreshold) / VelocityThreshold; };
+    FORCEINLINE float GetPercentPower() const
+    {
+        return FMath::Clamp(GetPawnOwner()->GetVelocity().Size(), 0.f, VelocityThreshold) / VelocityThreshold;
+    };
 
 protected:
     UPROPERTY(EditDefaultsOnly, Category = "TG|Movement")
@@ -51,6 +60,15 @@ protected:
 
     UPROPERTY(EditDefaultsOnly, Category = "TG|Movement|Engine Braking")
     float DelayResetLastPowerInput = 0.05f;
+
+    UPROPERTY(EditDefaultsOnly, Category = "TG|Movement")
+    float SidewaysSpeed = 1000.f;
+
+    UPROPERTY(EditDefaultsOnly, Category = "TG|Movement")
+    FName ForwardSocketName = FName(TEXT("ForwardPowerPoint"));
+
+    UPROPERTY(EditDefaultsOnly, Category = "TG|Movement")
+    FName BackwardSocketName = FName(TEXT("BackwardPowerPoint"));
 
 protected:
     FORCEINLINE float GetLastPowerInput() const { return LastPowerInput; };

@@ -7,7 +7,6 @@
 #include "DrawDebugHelpers.h"
 #include "Components/BoxComponent.h"
 #include "Components/TGMovementComponent.h"
-#include "Engine/StaticMeshSocket.h"
 
 ATGTank::ATGTank()
 {
@@ -43,28 +42,12 @@ void ATGTank::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 void ATGTank::Move(const FInputActionInstance& Instance)
 {
-    if (!Foundation) return;
+    if (!MovementComp) return;
     const FVector2D AxisValue = Instance.GetValue().Get<FVector2D>();
 
-    FVector ForwardSocketDirection;
-    FVector BackwardSocketDirection;
-
-    if (AxisValue.X != 0.f && MovementComp->HasGroundContact())
+    if (AxisValue.X != 0.f)
     {
-        if (AxisValue.X > 0.f)
-        {
-            ForwardSocketDirection = -(Foundation->GetSocketRotation(ForwardSocketName).Vector());
-            Foundation->AddImpulseAtLocation(ForwardSocketDirection * SidewaysSpeed, Foundation->GetSocketLocation(ForwardSocketName));
-            BackwardSocketDirection = -(Foundation->GetSocketRotation(BackwardSocketName).Vector());
-            Foundation->AddImpulseAtLocation(BackwardSocketDirection * SidewaysSpeed, Foundation->GetSocketLocation(BackwardSocketName));
-        }
-        else
-        {
-            ForwardSocketDirection = Foundation->GetSocketRotation(ForwardSocketName).Vector();
-            Foundation->AddImpulseAtLocation(ForwardSocketDirection * SidewaysSpeed, Foundation->GetSocketLocation(ForwardSocketName));
-            BackwardSocketDirection = Foundation->GetSocketRotation(BackwardSocketName).Vector();
-            Foundation->AddImpulseAtLocation(BackwardSocketDirection * SidewaysSpeed, Foundation->GetSocketLocation(BackwardSocketName));
-        }
+        MovementComp->AddImpulseRotate(AxisValue.X);
     }
 
     if (AxisValue.Y != 0.f)
