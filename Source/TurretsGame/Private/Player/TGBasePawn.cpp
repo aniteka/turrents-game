@@ -116,6 +116,6 @@ void ATGBasePawn::ChangeGunRotator()
 void ATGBasePawn::PrimaryAttack()
 {
     if (!ShootComp || !Gun) return;
-    ShootComp->ShootFromComponent(Gun);
+    ShootComp->ShootFromComponent(Gun, FName(TEXT("ShootSocket")));
     ShootComp->DrawCrosshair(Gun);
 }

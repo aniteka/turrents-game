@@ -7,6 +7,7 @@
 #include "DrawDebugHelpers.h"
 #include "Components/BoxComponent.h"
 #include "Components/TGMovementComponent.h"
+#include "Engine/StaticMeshSocket.h"
 
 ATGTank::ATGTank()
 {
@@ -45,7 +46,6 @@ void ATGTank::Move(const FInputActionInstance& Instance)
     {
         FRotator CurrentRotation = Foundation->GetComponentRotation();
         FRotator NewRotation = CurrentRotation + FRotator(0.f, AxisValue.X, 0.f);
-
         Foundation->SetRelativeRotation(NewRotation);
     }
 
