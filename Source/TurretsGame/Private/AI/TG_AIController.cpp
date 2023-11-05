@@ -5,7 +5,6 @@
 
 #include "Components/TGShootComponent.h"
 #include "Kismet/GameplayStatics.h"
-#include "Kismet/KismetMathLibrary.h"
 #include "Perception/AIPerceptionComponent.h"
 #include "Player/TGBasePawn.h"
 
@@ -44,7 +43,7 @@ void ATG_AIController::UpdateControlRotation(float DeltaTime, bool bUpdatePawn)
     
     FVector Dir;
     UGameplayStatics::SuggestProjectileVelocity(GetWorld(), Dir, BasePawn->GetActorLocation(),
-        GetFocusActor()->GetActorLocation(), 5000.f, false,
+        GetFocusActor()->GetActorLocation(), BasePawn->GetShootComponent()->GetInitialProjectileSpeed(), false,
             0, 0, ESuggestProjVelocityTraceOption::DoNotTrace);
     const auto NewControlRotation = Dir.GetSafeNormal().Rotation();
 
@@ -67,8 +66,7 @@ void ATG_AIController::PawnEndShooting()
 
 void ATG_AIController::ShootingCallback()
 {
-    if (!IsValid(BasePawn) || !IsValid(GetFocusActor())) return;
-
+    if (!IsValid(BasePawn)) return;
     BasePawn->PrimaryAttack();
 }
 
