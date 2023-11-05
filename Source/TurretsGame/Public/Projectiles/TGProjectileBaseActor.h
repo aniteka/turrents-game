@@ -27,6 +27,7 @@ public:
 protected:
     UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Components")
     UStaticMeshComponent* StaticMeshComponent;
+
     UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Components")
     UProjectileMovementComponent* ProjectileMovementComponent;
 

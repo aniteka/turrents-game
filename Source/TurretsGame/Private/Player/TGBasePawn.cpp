@@ -5,10 +5,14 @@
 #include "Components/TGShootComponent.h"
 #include "Components/TGHealthComponent.h"
 #include "Components/BoxComponent.h"
+#include "Components/SphereComponent.h"
+#include "Components/SplineMeshComponent.h"
+#include "Components/SplineComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "Kismet/GameplayStatics.h"
 
 ATGBasePawn::ATGBasePawn()
 {
@@ -35,6 +39,13 @@ ATGBasePawn::ATGBasePawn()
     CameraComp = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComp"));
     CameraComp->SetRelativeLocation(FVector(0.f, -300.f, 0.f));
     CameraComp->SetupAttachment(SpringArmComp);
+
+    SplineComponent = CreateDefaultSubobject<USplineComponent>(TEXT("SplineComponent"));
+    SplineComponent->SetupAttachment(GetRootComponent());
+
+    SphereHit = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("SphereHit"));
+    SphereHit->SetupAttachment(GetRootComponent());
+    SphereHit->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 float ATGBasePawn::GetHealthPercent() const
@@ -78,6 +89,8 @@ void ATGBasePawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 
     InputComp->BindAction(Input_PrimaryAttack, ETriggerEvent::Triggered, this, &ATGBasePawn::PrimaryAttack);
     InputComp->BindAction(Input_Look, ETriggerEvent::Triggered, this, &ATGBasePawn::Look);
+    InputComp->BindAction(Input_Crosshair, ETriggerEvent::Triggered, this, &ATGBasePawn::CrosshairActivate);
+    InputComp->BindAction(Input_Crosshair, ETriggerEvent::Completed, this, &ATGBasePawn::CrosshairDeactivate);
 }
 
 void ATGBasePawn::BeginPlay()
@@ -118,4 +131,97 @@ void ATGBasePawn::PrimaryAttack()
     if (!ShootComp || !Gun) return;
     ShootComp->ShootFromComponent(Gun, FName(TEXT("ShootSocket")));
     ShootComp->DrawCrosshair(Gun);
+}
+
+void ATGBasePawn::CrosshairActivate(const FInputActionValue& InputValue)
+{
+    ClearCrosshair();
+
+    if (!SplineComponent) return;
+
+    const auto GunTransform = Gun->GetSocketTransform(GunShootSocketName);
+
+    TArray<TEnumAsByte<EObjectTypeQuery>> Objects;
+
+    Objects.Add(UEngineTypes::ConvertToObjectType(ECC_Pawn));
+    Objects.Add(UEngineTypes::ConvertToObjectType(ECC_WorldDynamic));
+    Objects.Add(UEngineTypes::ConvertToObjectType(ECC_WorldStatic));
+
+    FPredictProjectilePathParams PredictParams;
+    PredictParams.ActorsToIgnore.Add(this);
+    PredictParams.bTraceComplex = false;
+    PredictParams.bTraceWithChannel = false;
+    PredictParams.bTraceWithCollision = true;
+    PredictParams.DrawDebugType = EDrawDebugTrace::None;
+    PredictParams.LaunchVelocity = GunTransform.GetRotation().GetForwardVector() * 5000.f;
+    PredictParams.MaxSimTime = 2.f;
+    PredictParams.ObjectTypes = Objects;
+    PredictParams.OverrideGravityZ = 0.f;
+    PredictParams.ProjectileRadius = 20.f;
+    PredictParams.SimFrequency = 15.f;
+    PredictParams.StartLocation = GunTransform.GetLocation();
+
+    FPredictProjectilePathResult PredictResult;
+    UGameplayStatics::PredictProjectilePath(this, PredictParams, PredictResult);
+
+    for (int i = 0; i < PredictResult.PathData.Num(); ++i)
+    {
+        SplineComponent->AddSplinePointAtIndex(PredictResult.PathData[i].Location, i, ESplineCoordinateSpace::World);
+    }
+
+    if (SphereHit)
+    {
+        SphereHit->SetVisibility(true);
+        SphereHit->SetWorldLocation(PredictResult.PathData.Last().Location);
+    }
+
+    SplineComponent->SetSplinePointType(PredictResult.PathData.Num() - 1, ESplinePointType::CurveClamped);
+
+    for (int i = 0; i <= SplineComponent->GetNumberOfSplinePoints() - 2; ++i)
+    {
+        auto SplineMeshComponent =
+            Cast<USplineMeshComponent>(AddComponentByClass(USplineMeshComponent::StaticClass(), true, FTransform(), false));
+        if (!SplineMeshComponent) continue;
+
+        SplineMeshComponent->SetMobility(EComponentMobility::Movable);
+
+        if (SplineMesh && SplineMaterial)
+        {
+            SplineMeshComponent->SetStaticMesh(SplineMesh);
+            SplineMeshComponent->SetMaterial(0, SplineMaterial);
+        }
+
+        SplineMeshComponent->SetStartScale(FVector2D(CrosshairDepth, CrosshairDepth));
+        SplineMeshComponent->SetEndScale(FVector2D(CrosshairDepth, CrosshairDepth));
+
+        PointsArray.Add(SplineMeshComponent);
+
+        SplineMeshComponent->SetStartAndEnd(                                                //
+            PredictResult.PathData[i].Location,                                             //
+            SplineComponent->GetTangentAtSplinePoint(i, ESplineCoordinateSpace::World),     //
+            PredictResult.PathData[i + 1].Location,                                         //
+            SplineComponent->GetTangentAtSplinePoint(i + 1, ESplineCoordinateSpace::World)  //
+        );
+    }
+}
+
+void ATGBasePawn::CrosshairDeactivate(const FInputActionValue& InputValue) 
+{
+    ClearCrosshair();
+}
+
+void ATGBasePawn::ClearCrosshair()
+{
+    for (auto& ArrayItem : PointsArray)
+    {
+        if (!ArrayItem) continue;
+        ArrayItem->DestroyComponent();
+    }
+    PointsArray.Empty();
+
+    if (!SplineComponent) return;
+    SplineComponent->ClearSplinePoints();
+
+    if (!SphereHit) return;
+    SphereHit->SetVisibility(false);
 }
