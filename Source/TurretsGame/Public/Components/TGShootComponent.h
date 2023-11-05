@@ -16,6 +16,13 @@ class TURRETSGAME_API UTGShootComponent : public UActorComponent
 public:
     UTGShootComponent();
 
+protected:
+    struct FInfoForShoot
+    {
+        FVector Location;
+        FVector Direction;
+    };
+    
 public:
     UFUNCTION(BlueprintCallable, Category = "TG|Shoot")
     ATGProjectileBaseActor* ShootFromLocation(FVector Location, FVector ShootDirection);
@@ -65,21 +72,19 @@ protected:
     UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "TG|Delay", meta = (EditCondition = "bUseShootDelay", EditConditionHides))
     float ShootDelayInSec = 1.5f;
 
-    UPROPERTY(EditAnywhere, Category = "TG|Delay", DisplayName = "Use Deferred Shot?",
+    // TURN OFF FOR AI
+    UPROPERTY(EditAnywhere, Category = "TG|Delay|DeferredShot", DisplayName = "Use Deferred Shot?",
         meta = (EditCondition = "bUseShootDelay", EditConditionHides))
     bool bUseDeferredShot = false;
 
     // -1 means use time from ShootDelayInSec
-    UPROPERTY(EditAnywhere, Category = "TG|Delay", meta = (EditCondition = "bUseDeferredShot", EditConditionHides))
+    UPROPERTY(EditAnywhere, Category = "TG|Delay|DeferredShot", meta = (EditCondition = "bUseDeferredShot", EditConditionHides))
     float RemainingTimeForDeferredShot = -1.f;
 
-private:
-    struct FInfoForShoot
-    {
-        FVector Location;
-        FVector Direction;
-    };
+protected:
+    virtual ATGProjectileBaseActor* ShootImplementation(const FInfoForShoot& Info);
 
+private:
     FTimerHandle ShootDelayTimerHandle;
     bool bShootImmediatelyAfterDelay = false;
     FInfoForShoot AfterDelayInfo;
@@ -90,5 +95,4 @@ private:
      * @return true - can shoot | false - cant
      */
     bool PreShootCheck(const FInfoForShoot& Info);
-    ATGProjectileBaseActor* ShootImplementation(const FInfoForShoot& Info);
 };

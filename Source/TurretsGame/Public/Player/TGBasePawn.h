@@ -22,6 +22,10 @@ class TURRETSGAME_API ATGBasePawn : public APawn
 public:
     ATGBasePawn();
 
+    FORCEINLINE UTGShootComponent* GetShootComponent() const { return ShootComp; }
+    FORCEINLINE UTGHealthComponent* GetHealthComponent() const { return HealthComp; }
+    virtual void PrimaryAttack();
+
 protected:
     UPROPERTY(EditDefaultsOnly, Category = "Components")
     UTGShootComponent* ShootComp;
@@ -65,5 +69,4 @@ protected:
     virtual void ChangeTowerRotator();
     virtual void ChangeGunRotator();
 
-    virtual void PrimaryAttack();
 };
