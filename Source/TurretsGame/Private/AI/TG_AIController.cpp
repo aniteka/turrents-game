@@ -4,6 +4,8 @@
 #include "AI/TG_AIController.h"
 
 #include "Components/TGShootComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "Perception/AIPerceptionComponent.h"
 #include "Player/TGBasePawn.h"
 
@@ -12,6 +14,7 @@ ATG_AIController::ATG_AIController()
     PrimaryActorTick.bCanEverTick = true;
 
     TGPerceptionComponent = CreateDefaultSubobject<UAIPerceptionComponent>("TGPerceptionComponent");
+    GetRootComponent()->SetUsingAbsoluteRotation(false);
 }
 
 void ATG_AIController::OnPossess(APawn* InPawn)
@@ -30,10 +33,28 @@ void ATG_AIController::OnUnPossess()
     BasePawn = nullptr;
 }
 
+void ATG_AIController::UpdateControlRotation(float DeltaTime, bool bUpdatePawn)
+{
+    if(GetFocusActor() == nullptr)
+    {
+        Super::UpdateControlRotation(DeltaTime, bUpdatePawn);
+        return;
+    }
+    if (!IsValid(BasePawn)) return;
+    
+    FVector Dir;
+    UGameplayStatics::SuggestProjectileVelocity(GetWorld(), Dir, BasePawn->GetActorLocation(),
+        GetFocusActor()->GetActorLocation(), 5000.f, false,
+            0, 0, ESuggestProjVelocityTraceOption::DoNotTrace);
+    const auto NewControlRotation = Dir.GetSafeNormal().Rotation();
+
+    SetControlRotation(NewControlRotation);
+}
+
 void ATG_AIController::PawnStartShooting()
 {
-    if(!IsValid(BasePawn)) return;
-    if(GetWorld()->GetTimerManager().TimerExists(ShootingTimerHandle)) return;
+    if (!IsValid(BasePawn)) return;
+    if (GetWorld()->GetTimerManager().TimerExists(ShootingTimerHandle)) return;
 
     GetWorld()->GetTimerManager().SetTimer(ShootingTimerHandle, this, &ATG_AIController::ShootingCallback,
         BasePawn->GetShootComponent()->GetShootDelayInSec(), true);
@@ -46,7 +67,8 @@ void ATG_AIController::PawnEndShooting()
 
 void ATG_AIController::ShootingCallback()
 {
-    if(!IsValid(BasePawn)) return;
+    if (!IsValid(BasePawn) || !IsValid(GetFocusActor())) return;
+
     BasePawn->PrimaryAttack();
 }
 

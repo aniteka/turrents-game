@@ -23,6 +23,8 @@ protected:
     virtual void OnPossess(APawn* InPawn) override;
     virtual void OnUnPossess() override;
 
+    virtual void UpdateControlRotation(float DeltaTime, bool bUpdatePawn) override;
+    
 protected:
     UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Components")
     UAIPerceptionComponent* TGPerceptionComponent;
