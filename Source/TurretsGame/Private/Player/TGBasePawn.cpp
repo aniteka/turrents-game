@@ -17,8 +17,8 @@ ATGBasePawn::ATGBasePawn()
     ShootComp = CreateDefaultSubobject<UTGShootComponent>(TEXT("ShootComp"));
     HealthComp = CreateDefaultSubobject<UTGHealthComponent>(TEXT("HealthComp"));
 
-    BoxComp = CreateDefaultSubobject<UBoxComponent>(TEXT("CapsuleComp"));
-    BoxComp->SetupAttachment(GetRootComponent());
+    GroundBoxComp = CreateDefaultSubobject<UBoxComponent>(TEXT("GroundBoxComp"));
+    GroundBoxComp->SetupAttachment(GetRootComponent());
 
     Tower = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Tower"));
     Tower->SetCollisionObjectType(ECC_Pawn);

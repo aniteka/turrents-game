@@ -7,6 +7,7 @@
 #include "TGOverlayWidget.generated.h"
 
 class UProgressBar;
+class UImage;
 
 UCLASS()
 class TURRETSGAME_API UTGOverlayWidget : public UUserWidget
@@ -18,11 +19,11 @@ protected:
 
 public:
     UPROPERTY(meta = (BindWidget))
-    UProgressBar* HealthBar;
+    UImage* HealthBarImage;
 
     UPROPERTY(meta = (BindWidget))
-    UProgressBar* ShootDelayBar;
+    UImage* ShootDelayBarImage;
 
     UPROPERTY(meta = (BindWidget))
-    UProgressBar* SpeedBar;
+    UImage* SpeedBarImage;
 };

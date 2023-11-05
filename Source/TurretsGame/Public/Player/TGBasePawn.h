@@ -22,8 +22,9 @@ class TURRETSGAME_API ATGBasePawn : public APawn
 public:
     ATGBasePawn();
 
-    float GetHealthPercent() const;
-    float GetShootDelayPercent() const;
+    virtual float GetHealthPercent() const;
+    virtual float GetShootDelayPercent() const;
+    virtual float GetSpeedPercent() const { return 0.f; };
 
 protected:
     UPROPERTY(EditDefaultsOnly, Category = "Components")
@@ -45,7 +46,7 @@ protected:
     UCameraComponent* CameraComp;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Components")
-    UBoxComponent* BoxComp;
+    UBoxComponent* GroundBoxComp;
 
 protected:
     UPROPERTY(EditDefaultsOnly, Category = "TG|Input")

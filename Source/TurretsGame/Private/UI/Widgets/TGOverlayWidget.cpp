@@ -2,14 +2,15 @@
 
 #include "UI/Widgets/TGOverlayWidget.h"
 #include "Components/ProgressBar.h"
+#include "Components/Image.h"
 
 void UTGOverlayWidget::NativeConstruct()
 {
     Super::NativeConstruct();
 
-    if (!HealthBar || !ShootDelayBar || !SpeedBar) return;
+    if (!HealthBarImage || !ShootDelayBarImage || !SpeedBarImage) return;
 
-    HealthBar->SetIsEnabled(false);
-    ShootDelayBar->SetIsEnabled(false);
-    SpeedBar->SetIsEnabled(false);
+    HealthBarImage->SetVisibility(ESlateVisibility::Hidden);
+    ShootDelayBarImage->SetVisibility(ESlateVisibility::Hidden);
+    SpeedBarImage->SetVisibility(ESlateVisibility::Hidden);
 }

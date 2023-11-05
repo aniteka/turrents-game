@@ -3,7 +3,7 @@
 #include "UI/HUD/TG_HUD.h"
 #include "UI/Widgets/TGMenuWidget.h"
 #include "UI/Widgets/TGOverlayWidget.h"
-#include "Components/ProgressBar.h"
+#include "Components/Image.h"
 #include "GameMode/TGGameMode.h"
 #include "GameMode/TGMenuGameMode.h"
 #include "Player/TGTank.h"
@@ -31,11 +31,15 @@ void ATG_HUD::BeginPlay()
     }
 }
 
-void ATG_HUD::Tick(float DeltaSeconds) 
+void ATG_HUD::Tick(float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);
 
-    UpdateShootDelayBar();
+    if (UpdateOwnerPawnVar() && OverlayWidget)
+    {
+        UpdateBar(OwnerPawn->GetShootDelayPercent(), OverlayWidget->ShootDelayBarImage);
+        UpdateBar(OwnerPawn->GetSpeedPercent(), OverlayWidget->SpeedBarImage);
+    }
 }
 
 void ATG_HUD::AddMenuWidget()
@@ -63,62 +67,46 @@ void ATG_HUD::OverlayWidgetCreateHandle()
     ATGTank* PlayerTank = Cast<ATGTank>(GetOwningPawn());
     if (PlayerTank)
     {
-        EnableHealthBar();
-        EnableShootDelayBar();
-        EnableSpeedBar();
+        EnableBar(OverlayWidget->HealthBarImage);
+        EnableBar(OverlayWidget->ShootDelayBarImage);
+        EnableBar(OverlayWidget->SpeedBarImage);
 
-        SetPercentHealthBar(PlayerTank->GetHealthPercent());
+        SetPercentBar(PlayerTank->GetHealthPercent(), OverlayWidget->HealthBarImage);
     }
     else
     {
         ATGTurret* PlayerTurret = Cast<ATGTurret>(GetOwningPawn());
         if (!PlayerTurret) return;
 
-        EnableHealthBar();
-        EnableShootDelayBar();
+        EnableBar(OverlayWidget->HealthBarImage);
+        EnableBar(OverlayWidget->ShootDelayBarImage);
     }
 }
 
-void ATG_HUD::UpdateShootDelayBar()
+void ATG_HUD::EnableBar(UImage* BarToEnable)
+{
+    if (!OverlayWidget || !BarToEnable) return;
+    BarToEnable->SetVisibility(ESlateVisibility::Visible);
+}
+
+void ATG_HUD::SetPercentBar(float Percent, UImage* BarToChange)
+{
+    if (!OverlayWidget || !BarToChange || BarToChange->GetVisibility() != ESlateVisibility::Visible) return;
+
+    auto DymMaterial = BarToChange->GetDynamicMaterial();
+    if (!DymMaterial) return;
+
+    DymMaterial->SetScalarParameterValue(FName(TEXT("ProgressAlpha")), Percent);
+}
+
+void ATG_HUD::UpdateBar(float Percent, UImage* BarToChange)
+{
+    if (!BarToChange) return;
+    SetPercentBar(Percent, BarToChange);
+}
+
+bool ATG_HUD::UpdateOwnerPawnVar()
 {
     OwnerPawn = (!OwnerPawn) ? Cast<ATGBasePawn>(GetOwningPawn()) : OwnerPawn;
-    if (!OwnerPawn) return;
-
-    SetPercentShootDelayBar(OwnerPawn->GetShootDelayPercent());
-}
-
-void ATG_HUD::EnableHealthBar()
-{
-    if (!OverlayWidget || !OverlayWidget->HealthBar) return;
-    OverlayWidget->HealthBar->SetIsEnabled(true);
-}
-
-void ATG_HUD::EnableShootDelayBar()
-{
-    if (!OverlayWidget || !OverlayWidget->ShootDelayBar) return;
-    OverlayWidget->ShootDelayBar->SetIsEnabled(true);
-}
-
-void ATG_HUD::EnableSpeedBar()
-{
-    if (!OverlayWidget || !OverlayWidget->SpeedBar) return;
-    OverlayWidget->SpeedBar->SetIsEnabled(true);
-}
-
-void ATG_HUD::SetPercentHealthBar(float Percent)
-{
-    if (!OverlayWidget || !OverlayWidget->HealthBar || !OverlayWidget->HealthBar->GetIsEnabled()) return;
-    OverlayWidget->HealthBar->SetPercent(Percent);
-}
-
-void ATG_HUD::SetPercentShootDelayBar(float Percent)
-{
-    if (!OverlayWidget || !OverlayWidget->ShootDelayBar || !OverlayWidget->ShootDelayBar->GetIsEnabled()) return;
-    OverlayWidget->ShootDelayBar->SetPercent(Percent);
-}
-
-void ATG_HUD::SetPercentSpeedBar(float Percent)
-{
-    if (!OverlayWidget || !OverlayWidget->SpeedBar || !OverlayWidget->SpeedBar->GetIsEnabled()) return;
-    OverlayWidget->SpeedBar->SetPercent(Percent);
+    return OwnerPawn ? true : false;
 }

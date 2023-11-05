@@ -15,8 +15,6 @@ class TURRETSGAME_API ATGPlayerController : public APlayerController
 
 public:
     void SetPercentHealthBar(float Percent);
-    void SetPercentShootDelayBar(float Percent);
-    void SetPercentSpeedBar(float Percent);
 
 private:
     UPROPERTY()

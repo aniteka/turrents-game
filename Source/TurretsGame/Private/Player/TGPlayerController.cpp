@@ -2,29 +2,14 @@
 
 #include "Player/TGPlayerController.h"
 #include "UI/HUD/TG_HUD.h"
+#include "UI/Widgets/TGOverlayWidget.h"
 
 void ATGPlayerController::SetPercentHealthBar(float Percent) 
 {
     UpdateHUDVar();
     if (!TG_HUD) return;
 
-    TG_HUD->SetPercentHealthBar(Percent);
-}
-
-void ATGPlayerController::SetPercentShootDelayBar(float Percent) 
-{
-    UpdateHUDVar();
-    if (!TG_HUD) return;
-
-    TG_HUD->SetPercentShootDelayBar(Percent);
-}
-
-void ATGPlayerController::SetPercentSpeedBar(float Percent) 
-{
-    UpdateHUDVar();
-    if (!TG_HUD) return;
-
-    TG_HUD->SetPercentSpeedBar(Percent);
+    TG_HUD->SetPercentBar(Percent, TG_HUD->OverlayWidget->HealthBarImage);
 }
 
 void ATGPlayerController::UpdateHUDVar()
