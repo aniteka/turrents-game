@@ -111,3 +111,8 @@ bool UTGMovementComponent::HasGroundContact() const
 
     return bHit;
 }
+
+float UTGMovementComponent::GetPercentPower() const
+{
+    return FMath::Clamp(GetPawnOwner()->GetVelocity().Size(), 0.f, VelocityThreshold) / VelocityThreshold;
+}

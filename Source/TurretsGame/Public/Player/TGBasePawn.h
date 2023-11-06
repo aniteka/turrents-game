@@ -14,6 +14,10 @@ class UTGShootComponent;
 class UTGHealthComponent;
 class UInputMappingContext;
 
+// Crosshair
+class USplineComponent;
+class USplineMeshComponent;
+
 UCLASS()
 class TURRETSGAME_API ATGBasePawn : public APawn
 {
@@ -48,6 +52,12 @@ protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Components")
     UBoxComponent* GroundBoxComp;
 
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Components")
+    USplineComponent* SplineComponent;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Components")
+    UStaticMeshComponent* SphereHit;
+
 protected:
     UPROPERTY(EditDefaultsOnly, Category = "TG|Input")
     UInputMappingContext* DefaultInputMapping;
@@ -58,8 +68,23 @@ protected:
     UPROPERTY(EditDefaultsOnly, Category = "TG|Input")
     UInputAction* Input_PrimaryAttack;
 
+    UPROPERTY(EditDefaultsOnly, Category = "TG|Input")
+    UInputAction* Input_Crosshair;
+
     UPROPERTY(EditDefaultsOnly, Category = "TG|Threshold", meta = (Units = "Degrees"))
     float GunPitchThreshold = 20.f;
+
+    UPROPERTY(EditDefaultsOnly, Category = "TG|Sockets")
+    FName GunShootSocketName = FName(TEXT("ShootSocket"));
+
+    UPROPERTY(EditDefaultsOnly, Category = "TG|Crosshair")
+    float CrosshairDepth = 0.1f;
+
+    UPROPERTY(EditDefaultsOnly, Category = "TG|Crosshair")
+    UStaticMesh* SplineMesh;
+
+    UPROPERTY(EditDefaultsOnly, Category = "TG|Crosshair")
+    UMaterial* SplineMaterial;
 
 protected:
     virtual void Tick(float DeltaSeconds) override;
@@ -67,8 +92,17 @@ protected:
     virtual void BeginPlay() override;
 
     void Look(const FInputActionValue& InputValue);
+    void CrosshairActivate(const FInputActionValue& InputValue);
+    void CrosshairDeactivate(const FInputActionValue& InputValue);
     virtual void ChangeTowerRotator();
     virtual void ChangeGunRotator();
 
     virtual void PrimaryAttack();
+
+private:
+    TArray<USplineMeshComponent*> PointsArray;
+    USplineMeshComponent* AAA;
+
+private:
+    void ClearCrosshair();
 };

@@ -30,14 +30,17 @@ public:
     virtual bool HasGroundContact() const;
 
     /** Returned percent, 0 -> 1 moving forward, 0 -> -1 moving back */
-    UFUNCTION(BlueprintCallable, Category = "Movement")
+    UFUNCTION(BlueprintCallable, Category = "TG|Movement")
     FORCEINLINE float GetPowerEngine() const { return Power; };
 
-    UFUNCTION(BlueprintCallable, Category = "Movement")
-    FORCEINLINE float GetPercentPower() const
-    {
-        return FMath::Clamp(GetPawnOwner()->GetVelocity().Size(), 0.f, VelocityThreshold) / VelocityThreshold;
-    };
+    UFUNCTION(BlueprintCallable, Category = "TG|Movement")
+    float GetPercentPower() const;
+
+    UFUNCTION(BlueprintCallable, Category = "TG|Movement")
+    FORCEINLINE FName GetForwardSocketName() const { return ForwardSocketName; }
+
+    UFUNCTION(BlueprintCallable, Category = "TG|Movement")
+    FORCEINLINE FName GetBackwardSocketName() const { return BackwardSocketName; }
 
 protected:
     UPROPERTY(EditDefaultsOnly, Category = "TG|Movement")
