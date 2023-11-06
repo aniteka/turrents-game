@@ -29,7 +29,10 @@ public:
     FORCEINLINE UTGShootComponent* GetShootComponent() const { return ShootComp; }
     FORCEINLINE UTGHealthComponent* GetHealthComponent() const { return HealthComp; }
     FORCEINLINE UStaticMeshComponent* GetGunStaticMeshComponent() const { return Gun; }
-    
+
+    virtual bool IsPawnHidden() const { return false; };
+    virtual bool IsPawnVisible() const { return false; };
+
     virtual void PrimaryAttack();
     virtual float GetHealthPercent() const;
     virtual float GetShootDelayPercent() const;

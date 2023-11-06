@@ -41,6 +41,7 @@ private:
 
     void PawnStartShooting();
     void PawnEndShooting();
+    void EndShooting(AActor* Actor);
     void ShootingCallback();
 
     ATGBasePawn* BasePawn = nullptr;

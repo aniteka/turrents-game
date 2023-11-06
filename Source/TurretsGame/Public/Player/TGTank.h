@@ -23,11 +23,12 @@ public:
     ATGTank();
 
     virtual void BeginPlay() override;
+    virtual void Destroyed() override;
 
     float GetSpeedPercent() const;
-    
-    bool IsPawnHidden() const { return PawnVisibility == EGameplayVisibility::EPGS_Hidden; };
-    bool IsPawnVisible() const { return PawnVisibility == EGameplayVisibility::EPGS_Visible; };
+
+    virtual bool IsPawnHidden() const override { return PawnVisibility == EGameplayVisibility::EPGS_Hidden; };
+    virtual bool IsPawnVisible() const override { return PawnVisibility == EGameplayVisibility::EPGS_Visible; };
 
     virtual void PostInitializeComponents() override;
 
@@ -61,10 +62,10 @@ private:
     UFUNCTION()
     void OnBushCollisionBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
         int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
-    
+
     UFUNCTION()
-    void OnBushCollisionEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
-        int32 OtherBodyIndex);
+    void OnBushCollisionEndOverlap(
+        UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
     UPROPERTY(EditDefaultsOnly, Category = "TG|Sound")
     USoundCue* IdleSound;

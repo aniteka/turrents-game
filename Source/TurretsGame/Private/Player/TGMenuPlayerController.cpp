@@ -4,6 +4,15 @@
 #include "UI/HUD/TG_HUD.h"
 #include "GameMode/TGMenuGameMode.h"
 
+void ATGMenuPlayerController::BeginPlay() 
+{
+    Super::BeginPlay();
+
+    FInputModeUIOnly InputModeUI;
+    SetInputMode(InputModeUI);
+    SetShowMouseCursor(true);
+}
+
 void ATGMenuPlayerController::StartPlayByGameType(EGameType Type)
 {
     if (!GetWorld()) return;

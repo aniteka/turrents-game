@@ -15,5 +15,7 @@ class TURRETSGAME_API ATGMenuPlayerController : public APlayerController
     GENERATED_BODY()
 
 public:
+    virtual void BeginPlay() override;
+
     void StartPlayByGameType(EGameType Type);
 };

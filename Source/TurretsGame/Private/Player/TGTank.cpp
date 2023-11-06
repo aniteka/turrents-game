@@ -74,6 +74,14 @@ void ATGTank::BeginPlay()
     PlayIdleSound();
 }
 
+void ATGTank::Destroyed()
+{
+    if (IdleSoundComponent) IdleSoundComponent->Deactivate();
+    if (StartMoveSoundComponent) StartMoveSoundComponent->Deactivate();
+    if (MoveSoundComponent) MoveSoundComponent->Deactivate();
+    if (RoadSmokeComponent) RoadSmokeComponent->Deactivate();
+}
+
 void ATGTank::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
     Super::SetupPlayerInputComponent(PlayerInputComponent);

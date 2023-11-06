@@ -1,6 +1,5 @@
 // TurretGame by Team #1. AlphaNova courses
 
-
 #include "AI/TG_AIController.h"
 
 #include "AI/TG_AITeams.h"
@@ -53,14 +52,13 @@ void ATG_AIController::UpdateControlRotation(float DeltaTime, bool bUpdatePawn)
     if (!IsValid(BasePawn)) return;
 
     FVector Dir;
-    UGameplayStatics::SuggestProjectileVelocity(GetWorld(), Dir, BasePawn->GetActorLocation(),
-        GetFocalPoint(), BasePawn->GetShootComponent()->GetInitialProjectileSpeed(), false,
-        0, 0, ESuggestProjVelocityTraceOption::DoNotTrace);
+    UGameplayStatics::SuggestProjectileVelocity(GetWorld(), Dir, BasePawn->GetActorLocation(), GetFocalPoint(),
+        BasePawn->GetShootComponent()->GetInitialProjectileSpeed(), false, 0, 0, ESuggestProjVelocityTraceOption::DoNotTrace);
 
     const auto OldControlRotation = GetControlRotation();
     const auto TargetControlRotation = Dir.GetSafeNormal().Rotation();
-    const auto NewControlRotation = UKismetMathLibrary::RInterpTo_Constant(OldControlRotation, TargetControlRotation, DeltaTime,
-        GunRotationInterpSpeed);
+    const auto NewControlRotation =
+        UKismetMathLibrary::RInterpTo_Constant(OldControlRotation, TargetControlRotation, DeltaTime, GunRotationInterpSpeed);
 
     SetControlRotation(NewControlRotation);
 }
@@ -70,13 +68,22 @@ void ATG_AIController::PawnStartShooting()
     if (!IsValid(BasePawn)) return;
     if (GetWorld()->GetTimerManager().TimerExists(ShootingTimerHandle)) return;
 
-    GetWorld()->GetTimerManager().SetTimer(ShootingTimerHandle, this, &ATG_AIController::ShootingCallback,
-        BasePawn->GetShootComponent()->GetShootDelayInSec(), true);
+    GetWorld()->GetTimerManager().SetTimer(
+        ShootingTimerHandle, this, &ATG_AIController::ShootingCallback, BasePawn->GetShootComponent()->GetShootDelayInSec(), true);
 }
 
 void ATG_AIController::PawnEndShooting()
 {
     GetWorld()->GetTimerManager().ClearTimer(ShootingTimerHandle);
+}
+
+void ATG_AIController::EndShooting(AActor* Actor)
+{
+    if (!Actor) return;
+
+    PawnEndShooting();
+    ClearFocus(EAIFocusPriority::LastFocusPriority);
+    SetFocalPoint(Actor->GetActorLocation());
 }
 
 void ATG_AIController::ShootingCallback()
@@ -89,7 +96,12 @@ void ATG_AIController::PerceptionUpdatedCallback(const FActorPerceptionUpdateInf
 {
     if (!UpdateInfo.Target.IsValid()) return;
 
-    const auto Actor = UpdateInfo.Target.Get();
+    const auto Actor = Cast<ATGBasePawn>(UpdateInfo.Target.Get());
+    if (Actor && Actor->IsPawnHidden())
+    {
+        EndShooting(Actor);
+        return;
+    }
 
     if (UpdateInfo.Stimulus.WasSuccessfullySensed())
     {
@@ -98,8 +110,6 @@ void ATG_AIController::PerceptionUpdatedCallback(const FActorPerceptionUpdateInf
     }
     else
     {
-        PawnEndShooting();
-        ClearFocus(EAIFocusPriority::LastFocusPriority);
-        SetFocalPoint(Actor->GetActorLocation());
+        EndShooting(Actor);
     }
 }

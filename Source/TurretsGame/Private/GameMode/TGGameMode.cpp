@@ -49,7 +49,7 @@ void ATGGameMode::EnemyDestroyed(AActor* EnemyToRemove)
 
     if (IsAllEnemiesDestroyed())
     {
-        RestartGame();
+        GameOver();
     }
 }
 

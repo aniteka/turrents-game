@@ -19,6 +19,10 @@ void ATGPlayerController::OnPossess(APawn* InPawn)
     Super::OnPossess(InPawn);
 
     SetGenericTeamId(TGTeamId::PlayerId);
+
+    FInputModeGameOnly InputModeGameOnly;
+    SetInputMode(InputModeGameOnly);
+    SetShowMouseCursor(false);
 }
 
 void ATGPlayerController::UpdateHUDVar()
