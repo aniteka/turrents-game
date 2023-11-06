@@ -2,6 +2,7 @@
 
 #include "Components/TGShootComponent.h"
 
+#include "GameFramework/ProjectileMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/GameplayStatics.h"
 #include "Projectiles/TGProjectileBaseActor.h"
@@ -131,6 +132,10 @@ ATGProjectileBaseActor* UTGShootComponent::ShootImplementation(const UTGShootCom
 
     FActorSpawnParameters SpawnParameters;
     SpawnParameters.Instigator = GetOwner<APawn>();
+    SpawnParameters.CustomPreSpawnInitalization = [Speed = InitialProjectileSpeed](AActor* Actor)
+    {
+        Actor->GetComponentByClass<UProjectileMovementComponent>()->InitialSpeed = Speed;
+    };
 
     const auto Projectile =
         GetWorld()->SpawnActor<ATGProjectileBaseActor>(ProjectileClass, Info.Location, Info.Direction.Rotation(), SpawnParameters);

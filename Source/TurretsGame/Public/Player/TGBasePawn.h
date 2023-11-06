@@ -26,6 +26,11 @@ class TURRETSGAME_API ATGBasePawn : public APawn
 public:
     ATGBasePawn();
 
+    FORCEINLINE UTGShootComponent* GetShootComponent() const { return ShootComp; }
+    FORCEINLINE UTGHealthComponent* GetHealthComponent() const { return HealthComp; }
+    FORCEINLINE UStaticMeshComponent* GetGunStaticMeshComponent() const { return Gun; }
+    
+    virtual void PrimaryAttack();
     virtual float GetHealthPercent() const;
     virtual float GetShootDelayPercent() const;
     virtual float GetSpeedPercent() const { return 0.f; };
@@ -97,11 +102,8 @@ protected:
     virtual void ChangeTowerRotator();
     virtual void ChangeGunRotator();
 
-    virtual void PrimaryAttack();
-
 private:
     TArray<USplineMeshComponent*> PointsArray;
-    USplineMeshComponent* AAA;
 
 private:
     void ClearCrosshair();

@@ -16,8 +16,13 @@ class TURRETSGAME_API UTGShootComponent : public UActorComponent
 public:
     UTGShootComponent();
 
-    float GetShootDelayPercent() const;
-
+protected:
+    struct FInfoForShoot
+    {
+        FVector Location;
+        FVector Direction;
+    };
+    
 public:
     UFUNCTION(BlueprintCallable, Category = "TG|Shoot")
     ATGProjectileBaseActor* ShootFromLocation(FVector Location, FVector ShootDirection);
@@ -44,12 +49,20 @@ public:
     FORCEINLINE TSubclassOf<ATGProjectileBaseActor> GetProjectileClass() const { return ProjectileClass; }
     FORCEINLINE void SetProjectileClass(TSubclassOf<ATGProjectileBaseActor> NewProjectileClass) { ProjectileClass = NewProjectileClass; }
 
+    FORCEINLINE float GetInitialProjectileSpeed() const { return InitialProjectileSpeed; }
+    FORCEINLINE void SetInitialProjectileSpeed(float NewInitialProjectileSpeed) { InitialProjectileSpeed = NewInitialProjectileSpeed; }
+
     FORCEINLINE float GetShootDelayInSec() const { return ShootDelayInSec; }
     FORCEINLINE void SetShootDelayInSec(float NewShootDelayInSec) { ShootDelayInSec = NewShootDelayInSec; }
 
+    float GetShootDelayPercent() const;
+    
 protected:
     UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "TG")
     TSubclassOf<ATGProjectileBaseActor> ProjectileClass;
+
+    UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "TG")
+    float InitialProjectileSpeed = 5000.f;
 
     UPROPERTY(EditAnywhere, Category = "TG", DisplayName = "Socket To Apply Impulse")
     FName ProjectileSocketToApplyImpulse = NAME_None;
@@ -67,21 +80,19 @@ protected:
     UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "TG|Delay", meta = (EditCondition = "bUseShootDelay", EditConditionHides))
     float ShootDelayInSec = 1.5f;
 
-    UPROPERTY(EditAnywhere, Category = "TG|Delay", DisplayName = "Use Deferred Shot?",
+    // TURN OFF FOR AI
+    UPROPERTY(EditAnywhere, Category = "TG|Delay|DeferredShot", DisplayName = "Use Deferred Shot?",
         meta = (EditCondition = "bUseShootDelay", EditConditionHides))
     bool bUseDeferredShot = false;
 
     // -1 means use time from ShootDelayInSec
-    UPROPERTY(EditAnywhere, Category = "TG|Delay", meta = (EditCondition = "bUseDeferredShot", EditConditionHides))
+    UPROPERTY(EditAnywhere, Category = "TG|Delay|DeferredShot", meta = (EditCondition = "bUseDeferredShot", EditConditionHides))
     float RemainingTimeForDeferredShot = -1.f;
 
-private:
-    struct FInfoForShoot
-    {
-        FVector Location;
-        FVector Direction;
-    };
+protected:
+    virtual ATGProjectileBaseActor* ShootImplementation(const FInfoForShoot& Info);
 
+private:
     FTimerHandle ShootDelayTimerHandle;
     bool bShootImmediatelyAfterDelay = false;
     FInfoForShoot AfterDelayInfo;
@@ -92,5 +103,4 @@ private:
      * @return true - can shoot | false - cant
      */
     bool PreShootCheck(const FInfoForShoot& Info);
-    ATGProjectileBaseActor* ShootImplementation(const FInfoForShoot& Info);
 };
