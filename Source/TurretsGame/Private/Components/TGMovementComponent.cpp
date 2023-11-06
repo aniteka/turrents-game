@@ -23,7 +23,6 @@ void UTGMovementComponent::AddImpulseMovement(float DeltaTime)
         {
             Power = FMath::FInterpTo(Power, 0.f, DeltaTime, InterpSpeed);
         }
-
         return;
     }
 

@@ -96,12 +96,7 @@ void ATG_AIController::PerceptionUpdatedCallback(const FActorPerceptionUpdateInf
 {
     if (!UpdateInfo.Target.IsValid()) return;
 
-    const auto Actor = Cast<ATGBasePawn>(UpdateInfo.Target.Get());
-    if (Actor && Actor->IsPawnHidden())
-    {
-        EndShooting(Actor);
-        return;
-    }
+    const auto Actor = UpdateInfo.Target.Get();
 
     if (UpdateInfo.Stimulus.WasSuccessfullySensed())
     {
