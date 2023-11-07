@@ -26,6 +26,9 @@ public:
     virtual void Destroyed() override;
 
     float GetSpeedPercent() const;
+    void ShootPayoff();
+
+    virtual void PrimaryAttack() override;
 
     virtual bool IsPawnHidden() const override { return PawnVisibility == EGameplayVisibility::EPGS_Hidden; };
     virtual bool IsPawnVisible() const override { return PawnVisibility == EGameplayVisibility::EPGS_Visible; };
@@ -57,6 +60,14 @@ protected:
 
     UPROPERTY(EditDefaultsOnly, Category = "TG|Gameplay")
     EGameplayVisibility PawnVisibility = EGameplayVisibility::EPGS_Visible;
+
+    UPROPERTY(EditDefaultsOnly, Category = "TG|Payoff")
+    float ShootPayoffStrength = 0.1f;
+    
+    FTimerHandle TimerShootPayoff;
+
+    UPROPERTY(EditDefaultsOnly, Category = "TG|Delay")
+    float DelayShootPayoff = 0.01f;
 
 private:
     UFUNCTION()

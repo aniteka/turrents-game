@@ -47,7 +47,7 @@ protected:
     float PowerThreshold = 1.f;
 
     /** Displays the maximum engine power from -1 to 1 */
-    UPROPERTY(VisibleAnywhere, Category = "TG|Movement", meta = (Units = "Percent"))
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "TG|Movement", meta = (Units = "Percent"))
     float Power = 0.f;
 
     UPROPERTY(EditDefaultsOnly, Category = "TG|Movement")

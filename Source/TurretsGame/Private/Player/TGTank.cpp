@@ -7,12 +7,11 @@
 #include "DrawDebugHelpers.h"
 #include "Components/BoxComponent.h"
 #include "Components/TGMovementComponent.h"
-
 #include "Gameplay/TGBushStealth.h"
-
 #include "Components/AudioComponent.h"
 #include "NiagaraComponent.h"
 #include "NiagaraFunctionLibrary.h"
+#include "Components/TGShootComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Sound/SoundCue.h"
 
@@ -186,4 +185,24 @@ float ATGTank::GetSpeedPercent() const
 {
     if (!MovementComp) return 0.f;
     return MovementComp->GetPercentPower();
+}
+
+void ATGTank::ShootPayoff()
+{
+    // Invert Forward to Backward
+    FVector BackwardVector = Gun->GetForwardVector() * -1;
+    float ProjectileSpeed = ShootComp->GetInitialProjectileSpeed();
+    Foundation->AddImpulse(BackwardVector * ProjectileSpeed * Foundation->GetMass() * ShootPayoffStrength);
+}
+
+void ATGTank::PrimaryAttack()
+{
+    if (!ShootComp) return;
+
+    if (ShootComp->CanShootNow())
+    {
+        GetWorldTimerManager().SetTimer(TimerShootPayoff, this, &ATGTank::ShootPayoff, DelayShootPayoff);
+    }
+    
+    Super::PrimaryAttack();
 }
