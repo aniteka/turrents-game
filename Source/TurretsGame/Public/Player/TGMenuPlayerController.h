@@ -8,6 +8,7 @@
 #include "TGMenuPlayerController.generated.h"
 
 class ATG_HUD;
+class USoundCue;
 
 UCLASS()
 class TURRETSGAME_API ATGMenuPlayerController : public APlayerController
@@ -18,4 +19,12 @@ public:
     virtual void BeginPlay() override;
 
     void StartPlayByGameType(EGameType Type);
+
+private:
+    UPROPERTY(EditDefaultsOnly, Category = "TG|Sounds")
+    USoundCue* MenuTheme;
+
+private:
+    void SetInputModeUIOnly();
+    void PlayMusic();
 };

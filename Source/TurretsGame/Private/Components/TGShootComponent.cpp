@@ -87,11 +87,6 @@ float UTGShootComponent::GetRemainsOfShootDelay() const
     }
 }
 
-void UTGShootComponent::DrawCrosshair(USceneComponent* Component, FName Socket, FVector ShootDirection)
-{
-    // TODO
-}
-
 void UTGShootComponent::ShootDelayCallback()
 {
     GetWorld()->GetTimerManager().ClearTimer(ShootDelayTimerHandle);
@@ -128,7 +123,7 @@ bool UTGShootComponent::PreShootCheck(const FInfoForShoot& Info)
 
 ATGProjectileBaseActor* UTGShootComponent::ShootImplementation(const UTGShootComponent::FInfoForShoot& Info)
 {
-    if (!PreShootCheck(Info)) return nullptr;
+    if (!PreShootCheck(Info) || !GetOwner()) return nullptr;
 
     FActorSpawnParameters SpawnParameters;
     SpawnParameters.Instigator = GetOwner<APawn>();
@@ -141,6 +136,8 @@ ATGProjectileBaseActor* UTGShootComponent::ShootImplementation(const UTGShootCom
         GetWorld()->SpawnActor<ATGProjectileBaseActor>(ProjectileClass, Info.Location, Info.Direction.Rotation(), SpawnParameters);
 
     if (!IsValid(Projectile)) return nullptr;
+
+    OnShootDelegate.Broadcast(GetOwner());
 
     if (bProjectileSetLifeSpanAfterSpawn)
     {

@@ -26,4 +26,7 @@ public:
 
     UPROPERTY(meta = (BindWidget))
     UImage* SpeedBarImage;
+
+    UPROPERTY(meta = (BindWidget))
+    UImage* EnemyHealthBarImage;
 };

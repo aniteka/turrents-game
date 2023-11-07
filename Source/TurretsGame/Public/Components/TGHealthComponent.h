@@ -63,8 +63,6 @@ private:
 private:
     void DeathCheck(float InHp);
 
-    void UpdateHUD();
-
     UFUNCTION()
     void OnTakeAnyDamageCallback(
         AActor* DamagedActor, float Damage, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);

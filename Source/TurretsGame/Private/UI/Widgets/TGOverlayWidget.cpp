@@ -8,9 +8,10 @@ void UTGOverlayWidget::NativeConstruct()
 {
     Super::NativeConstruct();
 
-    if (!HealthBarImage || !ShootDelayBarImage || !SpeedBarImage) return;
+    if (!HealthBarImage || !ShootDelayBarImage || !SpeedBarImage || !EnemyHealthBarImage) return;
 
     HealthBarImage->SetVisibility(ESlateVisibility::Hidden);
     ShootDelayBarImage->SetVisibility(ESlateVisibility::Hidden);
     SpeedBarImage->SetVisibility(ESlateVisibility::Hidden);
+    EnemyHealthBarImage->SetVisibility(ESlateVisibility::Hidden);
 }

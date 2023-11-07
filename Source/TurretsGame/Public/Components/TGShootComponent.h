@@ -8,6 +8,8 @@
 
 class ATGProjectileBaseActor;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnShoot, AActor*, Actor);
+
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class TURRETSGAME_API UTGShootComponent : public UActorComponent
 {
@@ -15,6 +17,9 @@ class TURRETSGAME_API UTGShootComponent : public UActorComponent
 
 public:
     UTGShootComponent();
+
+    UPROPERTY(BlueprintAssignable, Category = "Delegates")
+    FOnShoot OnShootDelegate;
 
 protected:
     struct FInfoForShoot
@@ -42,9 +47,6 @@ public:
 
     UFUNCTION(BlueprintPure, Category = "TG|Shoot|Delay")
     float GetRemainsOfShootDelay() const;
-
-    // Crosshair
-    void DrawCrosshair(USceneComponent* Component, FName Socket = NAME_None, FVector ShootDirection = FVector::ZeroVector);
 
     FORCEINLINE TSubclassOf<ATGProjectileBaseActor> GetProjectileClass() const { return ProjectileClass; }
     FORCEINLINE void SetProjectileClass(TSubclassOf<ATGProjectileBaseActor> NewProjectileClass) { ProjectileClass = NewProjectileClass; }

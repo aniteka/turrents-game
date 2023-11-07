@@ -8,11 +8,17 @@
 #include "Components/SphereComponent.h"
 #include "Components/SplineMeshComponent.h"
 #include "Components/SplineComponent.h"
+#include "Components/AudioComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Kismet/GameplayStatics.h"
+#include "NiagaraComponent.h"
+#include "NiagaraFunctionLibrary.h"
+#include "Sound/SoundCue.h"
+#include "GameMode/TGGameMode.h"
+#include "AIController.h"
 
 ATGBasePawn::ATGBasePawn()
 {
@@ -48,24 +54,35 @@ ATGBasePawn::ATGBasePawn()
     SphereHit->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
-float ATGBasePawn::GetHealthPercent() const
-{
-    if (!HealthComp) return 0.f;
-    return HealthComp->GetHealthPercent();
-}
-
-float ATGBasePawn::GetShootDelayPercent() const
-{
-    if (!ShootComp) return 0.f;
-    return ShootComp->GetShootDelayPercent();
-}
-
 void ATGBasePawn::Tick(float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);
 
     ChangeTowerRotator();
     ChangeGunRotator();
+}
+
+void ATGBasePawn::BeginPlay()
+{
+    Super::BeginPlay();
+
+    Tags.Add(CustomTag);
+
+    BindDelegates(); 
+    UpdateHealthHUD();
+}
+
+void ATGBasePawn::BindDelegates() 
+{
+    if (HealthComp)
+    {
+        HealthComp->OnDeathDelegate.AddDynamic(this, &ATGBasePawn::OnDeathCallback);
+        HealthComp->OnHpChangeDelegate.AddDynamic(this, &ATGBasePawn::OnHpChangeCallback);
+    }
+    if (ShootComp)
+    {
+        ShootComp->OnShootDelegate.AddDynamic(this, &ATGBasePawn::OnShootCallback);
+    }
 }
 
 void ATGBasePawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -89,13 +106,9 @@ void ATGBasePawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 
     InputComp->BindAction(Input_PrimaryAttack, ETriggerEvent::Triggered, this, &ATGBasePawn::PrimaryAttack);
     InputComp->BindAction(Input_Look, ETriggerEvent::Triggered, this, &ATGBasePawn::Look);
+    InputComp->BindAction(Input_Look, ETriggerEvent::Completed, this, &ATGBasePawn::StopLook);
     InputComp->BindAction(Input_Crosshair, ETriggerEvent::Triggered, this, &ATGBasePawn::CrosshairActivate);
     InputComp->BindAction(Input_Crosshair, ETriggerEvent::Completed, this, &ATGBasePawn::CrosshairDeactivate);
-}
-
-void ATGBasePawn::BeginPlay()
-{
-    Super::BeginPlay();
 }
 
 void ATGBasePawn::Look(const FInputActionValue& InputValue)
@@ -104,6 +117,23 @@ void ATGBasePawn::Look(const FInputActionValue& InputValue)
 
     AddControllerYawInput(Value.X);
     AddControllerPitchInput(Value.Y);
+
+    if (FMath::Abs(Value.X) > RotationSoundInputThreshold)
+    {
+        if (!GetWorld() || GetWorld()->GetTimerManager().IsTimerActive(RotationSoundTimerHandle)) return;
+
+        GetWorld()->GetTimerManager().SetTimer(RotationSoundTimerHandle, RotationSoundCanPlayAgainTimer, false);
+        StartRotateSound();
+    }
+    else
+    {
+        DeactivateRotationLoopComponent();
+    }
+}
+
+void ATGBasePawn::StopLook(const FInputActionValue& InputValue)
+{
+    DeactivateRotationLoopComponent();
 }
 
 void ATGBasePawn::ChangeTowerRotator()
@@ -126,21 +156,132 @@ void ATGBasePawn::ChangeGunRotator()
     Gun->SetRelativeRotation(GunRot, true);
 }
 
+void ATGBasePawn::OnDeathCallback(AActor* Actor)
+{
+    if (!Actor || Actor != this) return;
+
+    PlayDeathVFX();
+    SayToGameModeAboutDeath();
+}
+
+
+void ATGBasePawn::OnHpChangeCallback(AActor* Actor, float NewHp, float Delta)
+{
+    if (!Actor || Actor != this) return;
+
+    UpdateHealthHUD();
+    TrySpawnFireBodyVFX();
+}
+
+void ATGBasePawn::UpdateHealthHUD()
+{
+    TGPlayerController = (!TGPlayerController) ? GetController<ATGPlayerController>() : TGPlayerController;
+    if (!TGPlayerController) return;
+
+    TGPlayerController->SetPercentHealthBar(GetHealthPercent());
+}
+
+void ATGBasePawn::SayToGameModeAboutDeath()
+{
+    auto GameMode = Cast<ATGGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
+    if (!GameMode) return;
+
+    auto AIController = GetController<AAIController>();
+    if (AIController)
+    {
+        GameMode->EnemyDestroyed(this);
+        Destroy();
+    }
+    else
+    {
+        GameMode->GameOver();
+    }
+}
+
+void ATGBasePawn::OnShootCallback(AActor* Actor) 
+{
+    if (ShotSound && ShotSystem && Actor && Actor == this)
+    {
+        UGameplayStatics::PlaySoundAtLocation(this, ShotSound, Gun->GetSocketLocation(GunShootSocketName));
+        UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, ShotSystem, Gun->GetSocketLocation(GunShootSocketName));
+    }
+}
+
+void ATGBasePawn::TrySpawnFireBodyVFX()
+{
+    if (!BodyFireComponent && BodyFireSystem && GetHealthPercent() <= PercentToStartFire)
+    {
+        BodyFireComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(  //
+            BodyFireSystem,                                                //
+            GetRootComponent(),                                            //
+            FName(),                                                       //
+            GetActorLocation(),                                            //
+            GetActorRotation(),                                            //
+            EAttachLocation::KeepWorldPosition,                            //
+            false                                                          //
+        );
+    }
+}
+
+void ATGBasePawn::PlayDeathVFX()
+{
+    if (!DestroySystem || !DestroyExlpSystem) return;
+
+    UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, DestroySystem, GetActorLocation());
+    UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, DestroyExlpSystem, GetActorLocation());
+}
+
 void ATGBasePawn::PrimaryAttack()
 {
     if (!ShootComp || !Gun) return;
-    ShootComp->ShootFromComponent(Gun, FName(TEXT("ShootSocket")));
-    ShootComp->DrawCrosshair(Gun);
+
+    ShootComp->ShootFromComponent(Gun, GunShootSocketName);
+}
+
+void ATGBasePawn::StartRotateSound()
+{
+    if (RotationLoopSound && !RotationLoopComponent)
+    {
+        RotationLoopComponent = UGameplayStatics::SpawnSoundAttached(RotationLoopSound, GetRootComponent());
+    }
+}
+
+void ATGBasePawn::DeactivateRotationLoopComponent()
+{
+    if (RotationLoopComponent)
+    {
+        RotationLoopComponent->Deactivate();
+        RotationLoopComponent = nullptr;
+    }
 }
 
 void ATGBasePawn::CrosshairActivate(const FInputActionValue& InputValue)
 {
     ClearCrosshair();
 
-    if (!SplineComponent) return;
+    FPredictProjectilePathResult PredictResult;
+
+    GetCrosshairPredictResult(PredictResult);
+    DrawCrosshair(PredictResult);
+    DrawEnemyHealthBar(PredictResult);
+}
+
+void ATGBasePawn::CrosshairDeactivate(const FInputActionValue& InputValue)
+{
+    TGPlayerController = (!TGPlayerController) ? GetController<ATGPlayerController>() : TGPlayerController;
+    if (TGPlayerController)
+    {
+        TGPlayerController->EnableEnemyHealthBar(false);
+    }
+
+    ClearCrosshair();
+}
+
+void ATGBasePawn::GetCrosshairPredictResult(FPredictProjectilePathResult& PredictResult)
+{
+    if (!Gun || !ShootComp) return;
 
     const auto GunTransform = Gun->GetSocketTransform(GunShootSocketName);
-
     TArray<TEnumAsByte<EObjectTypeQuery>> Objects;
 
     Objects.Add(UEngineTypes::ConvertToObjectType(ECC_Pawn));
@@ -153,7 +294,7 @@ void ATGBasePawn::CrosshairActivate(const FInputActionValue& InputValue)
     PredictParams.bTraceWithChannel = false;
     PredictParams.bTraceWithCollision = true;
     PredictParams.DrawDebugType = EDrawDebugTrace::None;
-    PredictParams.LaunchVelocity = GunTransform.GetRotation().GetForwardVector() * 5000.f;
+    PredictParams.LaunchVelocity = GunTransform.GetRotation().GetForwardVector() * ShootComp->GetInitialProjectileSpeed();
     PredictParams.MaxSimTime = 2.f;
     PredictParams.ObjectTypes = Objects;
     PredictParams.OverrideGravityZ = 0.f;
@@ -161,8 +302,12 @@ void ATGBasePawn::CrosshairActivate(const FInputActionValue& InputValue)
     PredictParams.SimFrequency = 15.f;
     PredictParams.StartLocation = GunTransform.GetLocation();
 
-    FPredictProjectilePathResult PredictResult;
     UGameplayStatics::PredictProjectilePath(this, PredictParams, PredictResult);
+}
+
+void ATGBasePawn::DrawCrosshair(FPredictProjectilePathResult& PredictResult)
+{
+    if (!SplineComponent) return;
 
     for (int i = 0; i < PredictResult.PathData.Num(); ++i)
     {
@@ -205,9 +350,26 @@ void ATGBasePawn::CrosshairActivate(const FInputActionValue& InputValue)
     }
 }
 
-void ATGBasePawn::CrosshairDeactivate(const FInputActionValue& InputValue) 
+void ATGBasePawn::DrawEnemyHealthBar(FPredictProjectilePathResult& PredictResult)
 {
-    ClearCrosshair();
+    TGPlayerController = (!TGPlayerController) ? GetController<ATGPlayerController>() : TGPlayerController;
+    if (!TGPlayerController) return;
+
+    const auto CrosshairHitResult = PredictResult.HitResult;
+    const bool bShowEnemyHealth = CrosshairHitResult.bBlockingHit && CrosshairHitResult.GetActor() &&
+                                  !CrosshairHitResult.GetActor()->Tags.IsEmpty() && CrosshairHitResult.GetActor()->Tags[0] == CustomTag;
+    if (bShowEnemyHealth)
+    {
+        const ATGBasePawn* TargetPawn = Cast<ATGBasePawn>(CrosshairHitResult.GetActor());
+        if (!TargetPawn) return;
+
+        TGPlayerController->SetPercentEnemyHealthBar(TargetPawn->GetHealthPercent());
+        TGPlayerController->EnableEnemyHealthBar(true);
+    }
+    else
+    {
+        TGPlayerController->EnableEnemyHealthBar(false);
+    }
 }
 
 void ATGBasePawn::ClearCrosshair()
@@ -224,4 +386,16 @@ void ATGBasePawn::ClearCrosshair()
 
     if (!SphereHit) return;
     SphereHit->SetVisibility(false);
+}
+
+float ATGBasePawn::GetHealthPercent() const
+{
+    if (!HealthComp) return 0.f;
+    return HealthComp->GetHealthPercent();
+}
+
+float ATGBasePawn::GetShootDelayPercent() const
+{
+    if (!ShootComp) return 0.f;
+    return ShootComp->GetShootDelayPercent();
 }

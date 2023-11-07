@@ -37,8 +37,8 @@ void ATG_HUD::Tick(float DeltaSeconds)
 
     if (UpdateOwnerPawnVar() && OverlayWidget)
     {
-        UpdateBar(OwnerPawn->GetShootDelayPercent(), OverlayWidget->ShootDelayBarImage);
-        UpdateBar(OwnerPawn->GetSpeedPercent(), OverlayWidget->SpeedBarImage);
+        SetPercentBar(OwnerPawn->GetShootDelayPercent(), OverlayWidget->ShootDelayBarImage);
+        SetPercentBar(OwnerPawn->GetSpeedPercent(), OverlayWidget->SpeedBarImage);
     }
 }
 
@@ -67,9 +67,9 @@ void ATG_HUD::OverlayWidgetCreateHandle()
     ATGTank* PlayerTank = Cast<ATGTank>(GetOwningPawn());
     if (PlayerTank)
     {
-        EnableBar(OverlayWidget->HealthBarImage);
-        EnableBar(OverlayWidget->ShootDelayBarImage);
-        EnableBar(OverlayWidget->SpeedBarImage);
+        EnableBar(OverlayWidget->HealthBarImage, true);
+        EnableBar(OverlayWidget->ShootDelayBarImage, true);
+        EnableBar(OverlayWidget->SpeedBarImage, true);
 
         SetPercentBar(PlayerTank->GetHealthPercent(), OverlayWidget->HealthBarImage);
     }
@@ -78,15 +78,15 @@ void ATG_HUD::OverlayWidgetCreateHandle()
         ATGTurret* PlayerTurret = Cast<ATGTurret>(GetOwningPawn());
         if (!PlayerTurret) return;
 
-        EnableBar(OverlayWidget->HealthBarImage);
-        EnableBar(OverlayWidget->ShootDelayBarImage);
+        EnableBar(OverlayWidget->HealthBarImage, true);
+        EnableBar(OverlayWidget->ShootDelayBarImage, true);
     }
 }
 
-void ATG_HUD::EnableBar(UImage* BarToEnable)
+void ATG_HUD::EnableBar(UImage* BarToEnable, bool bEnable)
 {
     if (!OverlayWidget || !BarToEnable) return;
-    BarToEnable->SetVisibility(ESlateVisibility::Visible);
+    (bEnable) ? BarToEnable->SetVisibility(ESlateVisibility::Visible) : BarToEnable->SetVisibility(ESlateVisibility::Hidden);
 }
 
 void ATG_HUD::SetPercentBar(float Percent, UImage* BarToChange)
@@ -97,12 +97,6 @@ void ATG_HUD::SetPercentBar(float Percent, UImage* BarToChange)
     if (!DymMaterial) return;
 
     DymMaterial->SetScalarParameterValue(FName(TEXT("ProgressAlpha")), Percent);
-}
-
-void ATG_HUD::UpdateBar(float Percent, UImage* BarToChange)
-{
-    if (!BarToChange) return;
-    SetPercentBar(Percent, BarToChange);
 }
 
 bool ATG_HUD::UpdateOwnerPawnVar()

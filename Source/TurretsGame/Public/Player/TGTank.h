@@ -78,13 +78,13 @@ private:
     void OnBushCollisionEndOverlap(
         UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
-    UPROPERTY(EditDefaultsOnly, Category = "TG|Sound")
+    UPROPERTY(EditDefaultsOnly, Category = "TG|Sounds")
     USoundCue* IdleSound;
 
-    UPROPERTY(EditDefaultsOnly, Category = "TG|Sound")
+    UPROPERTY(EditDefaultsOnly, Category = "TG|Sounds")
     USoundCue* StartMoveSound;
 
-    UPROPERTY(EditDefaultsOnly, Category = "TG|Sound")
+    UPROPERTY(EditDefaultsOnly, Category = "TG|Sounds")
     USoundCue* MoveSound;
 
     UPROPERTY()
