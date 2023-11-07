@@ -1,9 +1,7 @@
 // TurretGame by Team #1. AlphaNova courses
 
 #include "Components/TGHealthComponent.h"
-#include "GameMode/TGGameMode.h"
 #include "Kismet/GameplayStatics.h"
-#include "AIController.h"
 #include "Player/TGPlayerController.h"
 
 UTGHealthComponent::UTGHealthComponent()
@@ -31,7 +29,6 @@ void UTGHealthComponent::SetHp(float NewHp)
     Hp = FMath::Clamp(NewHp, 0.f, MaxHp);
     OnHpChangeDelegate.Broadcast(GetOwner(), Hp, Hp - OldHp);
 
-    UpdateHUD();
     DeathCheck(Hp);
 }
 
@@ -46,36 +43,6 @@ void UTGHealthComponent::DeathCheck(float InHp)
 
     bIsDead = true;
     OnDeathDelegate.Broadcast(GetOwner());
-
-    auto GameMode = Cast<ATGGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
-    if (!GameMode) return;
-
-    auto AIController = GetOwner()->GetInstigatorController<AAIController>();
-    if (AIController)
-    {
-        GameMode->EnemyDestroyed(GetOwner());
-        GetOwner()->Destroy();
-    }
-    else
-    {
-        auto Controller = GetOwner()->GetInstigatorController();
-        if (!Controller) return;
-
-        GameMode->GameOver();
-    }
-}
-
-void UTGHealthComponent::UpdateHUD()
-{
-    if (!GetOwner()) return;
-
-    auto Pawn = Cast<APawn>(GetOwner());
-    if (!Pawn) return;
-
-    TGPlayerController = (!TGPlayerController) ? Pawn->GetController<ATGPlayerController>() : TGPlayerController;
-    if (!TGPlayerController) return;
-
-    TGPlayerController->SetPercentHealthBar(GetHealthPercent());
 }
 
 float UTGHealthComponent::GetHealthPercent() const

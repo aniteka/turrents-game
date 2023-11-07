@@ -1,10 +1,11 @@
 // TurretGame by Team #1. AlphaNova courses
 
 #include "Projectiles/TGProjectileBaseActor.h"
-
 #include "Engine/DamageEvents.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Sound/SoundCue.h"
+#include "NiagaraFunctionLibrary.h"
 
 ATGProjectileBaseActor::ATGProjectileBaseActor()
 {
@@ -35,8 +36,16 @@ void ATGProjectileBaseActor::PostInitializeComponents()
 void ATGProjectileBaseActor::StaticMeshComponentEventHitCallback(
     UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
-    if (!OtherActor) return;
-    if (GetInstigator() == OtherActor) return;
+    if (ExplosionSound && ExplosionSystem && SmokeExplSystem)
+    {
+        UGameplayStatics::PlaySoundAtLocation(this, ExplosionSound, GetActorLocation());
+        UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+            this, ExplosionSystem, GetActorLocation(), GetActorRotation(), FVector(ExplosionScale));
+        UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+            this, SmokeExplSystem, GetActorLocation(), GetActorRotation(), FVector(ExplosionScale));
+    }
+
+    if (!OtherActor || GetInstigator() == OtherActor) return;
 
     UGameplayStatics::ApplyPointDamage(
         OtherActor, HitDamage, FVector::ZeroVector, Hit, GetInstigator()->GetController(), this, UDamageType::StaticClass());

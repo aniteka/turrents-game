@@ -3,14 +3,15 @@
 #include "Player/TGMenuPlayerController.h"
 #include "UI/HUD/TG_HUD.h"
 #include "GameMode/TGMenuGameMode.h"
+#include "Kismet/GameplayStatics.h"
+#include "Sound/SoundCue.h"
 
-void ATGMenuPlayerController::BeginPlay() 
+void ATGMenuPlayerController::BeginPlay()
 {
     Super::BeginPlay();
 
-    FInputModeUIOnly InputModeUI;
-    SetInputMode(InputModeUI);
-    SetShowMouseCursor(true);
+    SetInputModeUIOnly();
+    PlayMusic();
 }
 
 void ATGMenuPlayerController::StartPlayByGameType(EGameType Type)
@@ -21,4 +22,17 @@ void ATGMenuPlayerController::StartPlayByGameType(EGameType Type)
     if (!GameMode) return;
 
     GameMode->StartPlayByGameType(Type);
+}
+
+void ATGMenuPlayerController::SetInputModeUIOnly()
+{
+    FInputModeUIOnly InputModeUI;
+    SetInputMode(InputModeUI);
+    SetShowMouseCursor(true);
+}
+
+void ATGMenuPlayerController::PlayMusic()
+{
+    if (!MenuTheme) return;
+    UGameplayStatics::PlaySound2D(this, MenuTheme);
 }

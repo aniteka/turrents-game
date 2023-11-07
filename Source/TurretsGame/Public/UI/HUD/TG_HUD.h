@@ -30,6 +30,7 @@ public:
     virtual void BeginPlay() override;
     virtual void Tick(float DeltaSeconds) override;
 
+    void EnableBar(UImage* BarToEnable, bool bEnable);
     void SetPercentBar(float Percent, UImage* BarToChange);
 
     void AddMenuWidget();
@@ -44,8 +45,6 @@ private:
 
 private:
     void OverlayWidgetCreateHandle();
-    void EnableBar(UImage* BarToEnable);
-    void UpdateBar(float Percent, UImage* BarToChange);
 
     bool UpdateOwnerPawnVar();
 };

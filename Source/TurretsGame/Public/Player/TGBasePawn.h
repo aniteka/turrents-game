@@ -13,10 +13,15 @@ class USpringArmComponent;
 class UTGShootComponent;
 class UTGHealthComponent;
 class UInputMappingContext;
-
-// Crosshair
+class ATGPlayerController;
 class USplineComponent;
 class USplineMeshComponent;
+class USoundCue;
+class UAudioComponent;
+class UNiagaraSystem;
+class UNiagaraComponent;
+
+struct FPredictProjectilePathResult;
 
 UCLASS()
 class TURRETSGAME_API ATGBasePawn : public APawn
@@ -94,20 +99,80 @@ protected:
     UPROPERTY(EditDefaultsOnly, Category = "TG|Crosshair")
     UMaterial* SplineMaterial;
 
+    UPROPERTY(EditDefaultsOnly, Category = "TG|Crosshair")
+    FName CustomTag = FName(TEXT("TGBasePawn"));
+
 protected:
     virtual void Tick(float DeltaSeconds) override;
     virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
     virtual void BeginPlay() override;
 
     void Look(const FInputActionValue& InputValue);
+    void StopLook(const FInputActionValue& InputValue);
     void CrosshairActivate(const FInputActionValue& InputValue);
     void CrosshairDeactivate(const FInputActionValue& InputValue);
     virtual void ChangeTowerRotator();
     virtual void ChangeGunRotator();
 
 private:
+    UPROPERTY(EditDefaultsOnly, Category = "TG|Sounds")
+    USoundCue* ShotSound;
+
+    UPROPERTY(EditDefaultsOnly, Category = "TG|Sounds")
+    USoundCue* RotationLoopSound;
+
+    UPROPERTY(EditDefaultsOnly, Category = "TG|Sounds")
+    float RotationSoundInputThreshold = 0.03f;
+
+    UPROPERTY(EditDefaultsOnly, Category = "TG|Sounds")
+    float RotationSoundCanPlayAgainTimer = 0.5f;
+
+    UPROPERTY(EditDefaultsOnly, Category = "TG|VFX")
+    float PercentToStartFire = 0.4;
+
+    UPROPERTY(EditDefaultsOnly, Category = "TG|VFX")
+    UNiagaraSystem* DestroySystem;
+
+    UPROPERTY(EditDefaultsOnly, Category = "TG|VFX")
+    UNiagaraSystem* DestroyExlpSystem;
+
+    UPROPERTY(EditDefaultsOnly, Category = "TG|VFX")
+    UNiagaraSystem* ShotSystem;
+
+    UPROPERTY(EditDefaultsOnly, Category = "TG|VFX")
+    UNiagaraSystem* BodyFireSystem;
+
+    UPROPERTY()
+    UNiagaraComponent* BodyFireComponent;
+
+    UPROPERTY()
+    UAudioComponent* RotationLoopComponent;
+
+    UPROPERTY()
+    ATGPlayerController* TGPlayerController;
+
     TArray<USplineMeshComponent*> PointsArray;
+    FTimerHandle RotationSoundTimerHandle;
 
 private:
+    UFUNCTION()
+    void OnDeathCallback(AActor* Actor);
+
+    UFUNCTION()
+    void OnShootCallback(AActor* Actor);
+
+    UFUNCTION()
+    void OnHpChangeCallback(AActor* Actor, float NewHp, float Delta);
+
+    void SayToGameModeAboutDeath();
+    void UpdateHealthHUD();
+    void TrySpawnFireBodyVFX();
+    void PlayDeathVFX();
+    void GetCrosshairPredictResult(FPredictProjectilePathResult& PredictResult);
+    void DrawCrosshair(FPredictProjectilePathResult& PredictResult);
+    void DrawEnemyHealthBar(FPredictProjectilePathResult& PredictResult);
     void ClearCrosshair();
+    void StartRotateSound();
+    void DeactivateRotationLoopComponent();
+    void BindDelegates();
 };
