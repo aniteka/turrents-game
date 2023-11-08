@@ -5,7 +5,6 @@
 #include "Components/TGShootComponent.h"
 #include "Components/TGHealthComponent.h"
 #include "Components/BoxComponent.h"
-#include "Components/SphereComponent.h"
 #include "Components/SplineMeshComponent.h"
 #include "Components/SplineComponent.h"
 #include "Components/AudioComponent.h"
@@ -68,11 +67,11 @@ void ATGBasePawn::BeginPlay()
 
     Tags.Add(CustomTag);
 
-    BindDelegates(); 
+    BindDelegates();
     UpdateHealthHUD();
 }
 
-void ATGBasePawn::BindDelegates() 
+void ATGBasePawn::BindDelegates()
 {
     if (HealthComp)
     {
@@ -143,6 +142,8 @@ void ATGBasePawn::ChangeTowerRotator()
     FRotator TowerRot = Tower->GetRelativeRotation();
     TowerRot.Yaw = SpringArmComp->GetTargetRotation().Yaw;
 
+    TowerRot = FMath::RInterpTo(Tower->GetRelativeRotation(), TowerRot, GetWorld()->DeltaTimeSeconds, TurnRate);
+
     Tower->SetRelativeRotation(TowerRot, true);
 }
 
@@ -198,7 +199,7 @@ void ATGBasePawn::SayToGameModeAboutDeath()
     }
 }
 
-void ATGBasePawn::OnShootCallback(AActor* Actor) 
+void ATGBasePawn::OnShootCallback(AActor* Actor)
 {
     if (ShotSound && ShotSystem && Actor && Actor == this)
     {
@@ -211,24 +212,24 @@ void ATGBasePawn::TrySpawnFireBodyVFX()
 {
     if (!BodyFireComponent && BodyFireSystem && GetHealthPercent() <= PercentToStartFire)
     {
-        BodyFireComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(  //
-            BodyFireSystem,                                                //
-            GetRootComponent(),                                            //
-            FName(),                                                       //
-            GetActorLocation(),                                            //
-            GetActorRotation(),                                            //
-            EAttachLocation::KeepWorldPosition,                            //
-            false                                                          //
-        );
+        BodyFireComponent = UNiagaraFunctionLibrary::SpawnSystemAttached( //
+            BodyFireSystem,                                               //
+            GetRootComponent(),                                           //
+            FName(),                                                      //
+            GetActorLocation(),                                           //
+            GetActorRotation(),                                           //
+            EAttachLocation::KeepWorldPosition,                           //
+            false                                                         //
+            );
     }
 }
 
 void ATGBasePawn::PlayDeathVFX()
 {
-    if (!DestroySystem || !DestroyExlpSystem) return;
+    if (!DestroySystem || !DestroyExplSystem) return;
 
     UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, DestroySystem, GetActorLocation());
-    UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, DestroyExlpSystem, GetActorLocation());
+    UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, DestroyExplSystem, GetActorLocation());
 }
 
 void ATGBasePawn::PrimaryAttack()
@@ -341,12 +342,12 @@ void ATGBasePawn::DrawCrosshair(FPredictProjectilePathResult& PredictResult)
 
         PointsArray.Add(SplineMeshComponent);
 
-        SplineMeshComponent->SetStartAndEnd(                                                //
-            PredictResult.PathData[i].Location,                                             //
-            SplineComponent->GetTangentAtSplinePoint(i, ESplineCoordinateSpace::World),     //
-            PredictResult.PathData[i + 1].Location,                                         //
-            SplineComponent->GetTangentAtSplinePoint(i + 1, ESplineCoordinateSpace::World)  //
-        );
+        SplineMeshComponent->SetStartAndEnd(                                               //
+            PredictResult.PathData[i].Location,                                            //
+            SplineComponent->GetTangentAtSplinePoint(i, ESplineCoordinateSpace::World),    //
+            PredictResult.PathData[i + 1].Location,                                        //
+            SplineComponent->GetTangentAtSplinePoint(i + 1, ESplineCoordinateSpace::World) //
+            );
     }
 }
 

@@ -35,9 +35,6 @@ public:
     FORCEINLINE UTGHealthComponent* GetHealthComponent() const { return HealthComp; }
     FORCEINLINE UStaticMeshComponent* GetGunStaticMeshComponent() const { return Gun; }
 
-    virtual bool IsPawnHidden() const { return false; };
-    virtual bool IsPawnVisible() const { return false; };
-
     virtual void PrimaryAttack();
     virtual float GetHealthPercent() const;
     virtual float GetShootDelayPercent() const;
@@ -102,6 +99,9 @@ protected:
     UPROPERTY(EditDefaultsOnly, Category = "TG|Crosshair")
     FName CustomTag = FName(TEXT("TGBasePawn"));
 
+    UPROPERTY(EditDefaultsOnly, Category = "TG|Tower")
+    float TurnRate = 1.f;
+
 protected:
     virtual void Tick(float DeltaSeconds) override;
     virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
@@ -134,7 +134,7 @@ private:
     UNiagaraSystem* DestroySystem;
 
     UPROPERTY(EditDefaultsOnly, Category = "TG|VFX")
-    UNiagaraSystem* DestroyExlpSystem;
+    UNiagaraSystem* DestroyExplSystem;
 
     UPROPERTY(EditDefaultsOnly, Category = "TG|VFX")
     UNiagaraSystem* ShotSystem;

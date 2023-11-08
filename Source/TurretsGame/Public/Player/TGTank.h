@@ -30,19 +30,12 @@ public:
 
     virtual void PrimaryAttack() override;
 
-    virtual bool IsPawnHidden() const override { return PawnVisibility == EGameplayVisibility::EPGS_Hidden; };
-    virtual bool IsPawnVisible() const override { return PawnVisibility == EGameplayVisibility::EPGS_Visible; };
-
-    virtual void PostInitializeComponents() override;
-
 protected:
     virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
     void Move(const FInputActionInstance& Instance);
     void StopMove(const FInputActionInstance& Instance);
     virtual void ChangeTowerRotator() override;
-
-    void SetPawnVisibility(AActor* OtherActor, EGameplayVisibility VisibilityState);
 
 protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Components")
@@ -58,26 +51,15 @@ protected:
     UPROPERTY(EditDefaultsOnly, Category = "TG|Input")
     UInputAction* Input_Move;
 
-    UPROPERTY(EditDefaultsOnly, Category = "TG|Gameplay")
-    EGameplayVisibility PawnVisibility = EGameplayVisibility::EPGS_Visible;
-
     UPROPERTY(EditDefaultsOnly, Category = "TG|Payoff")
     float ShootPayoffStrength = 0.1f;
-    
+
     FTimerHandle TimerShootPayoff;
 
-    UPROPERTY(EditDefaultsOnly, Category = "TG|Delay")
+    UPROPERTY(EditDefaultsOnly, Category = "TG|Payoff")
     float DelayShootPayoff = 0.01f;
 
 private:
-    UFUNCTION()
-    void OnBushCollisionBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
-        int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
-
-    UFUNCTION()
-    void OnBushCollisionEndOverlap(
-        UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
-
     UPROPERTY(EditDefaultsOnly, Category = "TG|Sounds")
     USoundCue* IdleSound;
 
