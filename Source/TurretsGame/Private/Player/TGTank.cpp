@@ -60,6 +60,7 @@ void ATGTank::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
     InputComp->BindAction(Input_Move, ETriggerEvent::Triggered, this, &ATGTank::Move);
     InputComp->BindAction(Input_Move, ETriggerEvent::Completed, this, &ATGTank::StopMove);
+
 }
 
 void ATGTank::Move(const FInputActionInstance& Instance)
@@ -95,7 +96,7 @@ void ATGTank::ChangeTowerRotator()
     TowerRot.Yaw = SpringArmComp->GetTargetRotation().Yaw - Foundation->GetRelativeRotation().Yaw;
 
     TowerRot = FMath::RInterpTo(Tower->GetRelativeRotation(), TowerRot, GetWorld()->DeltaTimeSeconds, TurnRate);
-    
+
     Tower->SetRelativeRotation(TowerRot, true);
 }
 
@@ -103,15 +104,15 @@ void ATGTank::ActivateRoadSmokeSystem()
 {
     if (!RoadSmokeSystem || RoadSmokeComponent || !MovementComp) return;
 
-    RoadSmokeComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(  //
-        RoadSmokeSystem,                                                //
-        Foundation,                                                     //
-        MovementComp->GetBackwardSocketName(),                          //
-        GetActorLocation(),                                             //
-        GetActorRotation(),                                             //
-        EAttachLocation::KeepWorldPosition,                             //
-        false                                                           //
-    );
+    RoadSmokeComponent = UNiagaraFunctionLibrary::SpawnSystemAttached( //
+        RoadSmokeSystem,                                               //
+        Foundation,                                                    //
+        MovementComp->GetBackwardSocketName(),                         //
+        GetActorLocation(),                                            //
+        GetActorRotation(),                                            //
+        EAttachLocation::KeepWorldPosition,                            //
+        false                                                          //
+        );
 }
 
 void ATGTank::DeactivateRoadSmokeSystem()
@@ -175,6 +176,6 @@ void ATGTank::PrimaryAttack()
     {
         GetWorldTimerManager().SetTimer(TimerShootPayoff, this, &ATGTank::ShootPayoff, DelayShootPayoff);
     }
-    
+
     Super::PrimaryAttack();
 }

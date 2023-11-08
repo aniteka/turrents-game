@@ -108,6 +108,7 @@ void ATGBasePawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
     InputComp->BindAction(Input_Look, ETriggerEvent::Completed, this, &ATGBasePawn::StopLook);
     InputComp->BindAction(Input_Crosshair, ETriggerEvent::Triggered, this, &ATGBasePawn::CrosshairActivate);
     InputComp->BindAction(Input_Crosshair, ETriggerEvent::Completed, this, &ATGBasePawn::CrosshairDeactivate);
+    InputComp->BindAction(Input_ShootStrength, ETriggerEvent::Triggered, this, &ATGBasePawn::ShootStrength);
 }
 
 void ATGBasePawn::Look(const FInputActionValue& InputValue)
@@ -276,6 +277,20 @@ void ATGBasePawn::CrosshairDeactivate(const FInputActionValue& InputValue)
     }
 
     ClearCrosshair();
+}
+
+void ATGBasePawn::ShootStrength(const FInputActionInstance& Instance)
+{
+    if (!ShootComp) return;
+
+    constexpr float ConvertPercentToValue = 100.f;
+    const float AxisValue = Instance.GetValue().Get<float>();
+
+    ShootSpeed = FMath::Clamp(ShootSpeed + AxisValue / ConvertPercentToValue, 0.f, 1.f);
+
+    static const float ProjectileSpeed = ShootComp->GetInitialProjectileSpeed();
+
+    ShootComp->SetInitialProjectileSpeed(ProjectileSpeed * ShootSpeed);
 }
 
 void ATGBasePawn::GetCrosshairPredictResult(FPredictProjectilePathResult& PredictResult)

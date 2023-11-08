@@ -81,6 +81,9 @@ protected:
     UPROPERTY(EditDefaultsOnly, Category = "TG|Input")
     UInputAction* Input_Crosshair;
 
+    UPROPERTY(EditDefaultsOnly, Category = "TG|Input")
+    UInputAction* Input_ShootStrength;
+
     UPROPERTY(EditDefaultsOnly, Category = "TG|Threshold", meta = (Units = "Degrees"))
     float GunPitchThreshold = 20.f;
 
@@ -102,6 +105,9 @@ protected:
     UPROPERTY(EditDefaultsOnly, Category = "TG|Tower")
     float TurnRate = 1.f;
 
+    UPROPERTY(EditDefaultsOnly, Category = "TG|Strength")
+    float ShootSpeed = 1.f;
+
 protected:
     virtual void Tick(float DeltaSeconds) override;
     virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
@@ -111,6 +117,7 @@ protected:
     void StopLook(const FInputActionValue& InputValue);
     void CrosshairActivate(const FInputActionValue& InputValue);
     void CrosshairDeactivate(const FInputActionValue& InputValue);
+    void ShootStrength(const FInputActionInstance& Instance);
     virtual void ChangeTowerRotator();
     virtual void ChangeGunRotator();
 

@@ -54,10 +54,10 @@ protected:
     UPROPERTY(EditDefaultsOnly, Category = "TG|Payoff")
     float ShootPayoffStrength = 0.1f;
 
-    FTimerHandle TimerShootPayoff;
-
     UPROPERTY(EditDefaultsOnly, Category = "TG|Payoff")
     float DelayShootPayoff = 0.01f;
+
+    FTimerHandle TimerShootPayoff;
 
 private:
     UPROPERTY(EditDefaultsOnly, Category = "TG|Sounds")
