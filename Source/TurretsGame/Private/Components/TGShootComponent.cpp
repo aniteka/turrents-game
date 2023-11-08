@@ -1,7 +1,6 @@
 // TurretGame by Team #1. AlphaNova courses
 
 #include "Components/TGShootComponent.h"
-
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/GameplayStatics.h"
@@ -19,7 +18,8 @@ ATGProjectileBaseActor* UTGShootComponent::ShootFromLocation(FVector Location, F
 
 ATGProjectileBaseActor* UTGShootComponent::ShootFromActor(AActor* Actor, FName Socket, FVector ShootDirection)
 {
-    check(Actor);
+    if (!Actor) return nullptr;
+
     FVector Location;
     FVector Direction;
 
@@ -42,7 +42,8 @@ ATGProjectileBaseActor* UTGShootComponent::ShootFromActor(AActor* Actor, FName S
 
 ATGProjectileBaseActor* UTGShootComponent::ShootFromComponent(USceneComponent* Component, FName Socket, FVector ShootDirection)
 {
-    check(Component);
+    if (!Component) return nullptr;
+
     FVector Location;
     FVector Direction;
 
@@ -58,7 +59,10 @@ ATGProjectileBaseActor* UTGShootComponent::ShootFromComponent(USceneComponent* C
         Direction = Component->GetForwardVector();
     }
 
-    if (ShootDirection != FVector::ZeroVector) Direction = ShootDirection;
+    if (ShootDirection != FVector::ZeroVector)
+    {
+        Direction = ShootDirection;
+    }
 
     return ShootImplementation({Location, Direction});
 }
@@ -70,6 +74,7 @@ bool UTGShootComponent::CanShootNow() const
 
 bool UTGShootComponent::IsShootDelay() const
 {
+    if (!GetWorld()) return false;
     return GetWorld()->GetTimerManager().IsTimerActive(ShootDelayTimerHandle);
 }
 
@@ -89,6 +94,8 @@ float UTGShootComponent::GetRemainsOfShootDelay() const
 
 void UTGShootComponent::ShootDelayCallback()
 {
+    if (!GetWorld()) return;
+
     GetWorld()->GetTimerManager().ClearTimer(ShootDelayTimerHandle);
     if (bUseDeferredShot && bShootImmediatelyAfterDelay)
     {
@@ -114,7 +121,7 @@ bool UTGShootComponent::PreShootCheck(const FInfoForShoot& Info)
         return false;
     }
 
-    if (!IsShootDelay())
+    if (!IsShootDelay() && GetWorld())
     {
         GetWorld()->GetTimerManager().SetTimer(ShootDelayTimerHandle, this, &UTGShootComponent::ShootDelayCallback, ShootDelayInSec);
     }
@@ -123,12 +130,13 @@ bool UTGShootComponent::PreShootCheck(const FInfoForShoot& Info)
 
 ATGProjectileBaseActor* UTGShootComponent::ShootImplementation(const UTGShootComponent::FInfoForShoot& Info)
 {
-    if (!PreShootCheck(Info) || !GetOwner()) return nullptr;
+    if (!PreShootCheck(Info) || !GetOwner() || !GetWorld()) return nullptr;
 
     FActorSpawnParameters SpawnParameters;
     SpawnParameters.Instigator = GetOwner<APawn>();
     SpawnParameters.CustomPreSpawnInitalization = [Speed = InitialProjectileSpeed](AActor* Actor)
     {
+        if (!Actor || !Actor->GetComponentByClass<UProjectileMovementComponent>()) return;
         Actor->GetComponentByClass<UProjectileMovementComponent>()->InitialSpeed = Speed;
     };
 

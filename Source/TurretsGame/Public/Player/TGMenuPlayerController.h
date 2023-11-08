@@ -7,7 +7,6 @@
 #include "TurretGameTypes.h"
 #include "TGMenuPlayerController.generated.h"
 
-class ATG_HUD;
 class USoundCue;
 
 UCLASS()

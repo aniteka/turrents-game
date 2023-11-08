@@ -9,4 +9,3 @@ namespace TGTeamId
     inline FGenericTeamId PlayerId{0};
     inline FGenericTeamId EnemyId{1};
 }
-

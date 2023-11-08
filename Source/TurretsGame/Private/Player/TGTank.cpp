@@ -34,6 +34,7 @@ ATGTank::ATGTank()
     CameraComp->SetupAttachment(SpringArmComp);
 
     MovementComp = CreateDefaultSubobject<UTGMovementComponent>(TEXT("MovementComp"));
+    MovementComp->SetUpdatedComponent(GetRootComponent());
 }
 
 void ATGTank::BeginPlay()
@@ -60,7 +61,6 @@ void ATGTank::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
     InputComp->BindAction(Input_Move, ETriggerEvent::Triggered, this, &ATGTank::Move);
     InputComp->BindAction(Input_Move, ETriggerEvent::Completed, this, &ATGTank::StopMove);
-
 }
 
 void ATGTank::Move(const FInputActionInstance& Instance)
@@ -104,15 +104,15 @@ void ATGTank::ActivateRoadSmokeSystem()
 {
     if (!RoadSmokeSystem || RoadSmokeComponent || !MovementComp) return;
 
-    RoadSmokeComponent = UNiagaraFunctionLibrary::SpawnSystemAttached( //
-        RoadSmokeSystem,                                               //
-        Foundation,                                                    //
-        MovementComp->GetBackwardSocketName(),                         //
-        GetActorLocation(),                                            //
-        GetActorRotation(),                                            //
-        EAttachLocation::KeepWorldPosition,                            //
-        false                                                          //
-        );
+    RoadSmokeComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(  //
+        RoadSmokeSystem,                                                //
+        Foundation,                                                     //
+        MovementComp->GetBackwardSocketName(),                          //
+        GetActorLocation(),                                             //
+        GetActorRotation(),                                             //
+        EAttachLocation::KeepWorldPosition,                             //
+        false                                                           //
+    );
 }
 
 void ATGTank::DeactivateRoadSmokeSystem()
@@ -162,17 +162,17 @@ float ATGTank::GetSpeedPercent() const
 
 void ATGTank::ShootPayoff()
 {
+    if (!Gun || !ShootComp || !Foundation) return;
+
     // Invert Forward to Backward
-    FVector BackwardVector = Gun->GetForwardVector() * -1;
-    float ProjectileSpeed = ShootComp->GetInitialProjectileSpeed();
+    const FVector BackwardVector = Gun->GetForwardVector() * -1;
+    const float ProjectileSpeed = ShootComp->GetInitialProjectileSpeed();
     Foundation->AddImpulse(BackwardVector * ProjectileSpeed * Foundation->GetMass() * ShootPayoffStrength);
 }
 
 void ATGTank::PrimaryAttack()
 {
-    if (!ShootComp) return;
-
-    if (ShootComp->CanShootNow())
+    if (ShootComp && ShootComp->CanShootNow())
     {
         GetWorldTimerManager().SetTimer(TimerShootPayoff, this, &ATGTank::ShootPayoff, DelayShootPayoff);
     }

@@ -17,7 +17,6 @@ void UTGHealthComponent::BeginPlay()
     {
         GetOwner()->OnTakeAnyDamage.AddDynamic(this, &UTGHealthComponent::OnTakeAnyDamageCallback);
     }
-
     SetHp(MaxHp);
 }
 

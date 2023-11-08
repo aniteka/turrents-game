@@ -13,6 +13,4 @@ class TURRETSGAME_API ATGTurret : public ATGBasePawn
 
 public:
     ATGTurret();
-
-    virtual void PostInitializeComponents() override;
 };

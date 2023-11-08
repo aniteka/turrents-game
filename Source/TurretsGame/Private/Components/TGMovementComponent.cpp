@@ -1,7 +1,6 @@
 // TurretGame by Team #1. AlphaNova courses
 
 #include "Components/TGMovementComponent.h"
-
 #include "Components/BoxComponent.h"
 
 void UTGMovementComponent::BeginPlay()
@@ -26,16 +25,16 @@ void UTGMovementComponent::AddImpulseMovement(float DeltaTime)
         return;
     }
 
-    if (!HasGroundContact()) return;
+    if (!HasGroundContact() || !UpdatedComponent) return;
 
     if (GetPawnOwner()->GetVelocity().Size() >= VelocityThreshold) return;
 
     Power = FMath::Clamp(Power + GetLastPowerInput(), -PowerThreshold, PowerThreshold);
 
-    UStaticMeshComponent* MyMeshComp = Cast<UStaticMeshComponent>(GetPawnOwner()->GetRootComponent());
+    UStaticMeshComponent* MyMeshComp = Cast<UStaticMeshComponent>(UpdatedComponent);
     if (!MyMeshComp) return;
 
-    const FVector ForwardVector = GetPawnOwner()->GetActorForwardVector();
+    const FVector ForwardVector = MyMeshComp->GetForwardVector();
     const FVector Impulse = ForwardVector * ImpulseStrength * DeltaTime * Power;
 
     MyMeshComp->AddImpulse(Impulse, NAME_None, true);
@@ -74,9 +73,9 @@ void UTGMovementComponent::AddImpulse(float PowerInput)
 
 void UTGMovementComponent::AddImpulseRotate(float PowerInput)
 {
-    if (!HasGroundContact() || FMath::IsNearlyZero(GetPowerEngine())) return;
+    if (!HasGroundContact() || FMath::IsNearlyZero(GetPowerEngine()) || !UpdatedComponent) return;
 
-    UStaticMeshComponent* MyMeshComp = Cast<UStaticMeshComponent>(GetPawnOwner()->GetRootComponent());
+    UStaticMeshComponent* MyMeshComp = Cast<UStaticMeshComponent>(UpdatedComponent);
     if (!MyMeshComp) return;
 
     // Invert value to correct working with socket settings, when object moving forward or backward
@@ -91,21 +90,21 @@ void UTGMovementComponent::AddImpulseRotate(float PowerInput)
 
 bool UTGMovementComponent::HasGroundContact() const
 {
-    APawn* ControlledPawn = GetPawnOwner();
+    const APawn* ControlledPawn = GetPawnOwner();
     if (!ControlledPawn) return false;
 
-    UBoxComponent* BoxComp = ControlledPawn->FindComponentByClass<UBoxComponent>();
+    const UBoxComponent* BoxComp = ControlledPawn->FindComponentByClass<UBoxComponent>();
     if (!BoxComp) return false;
 
-    FVector Start = BoxComp->GetComponentLocation();
+    const FVector Start = BoxComp->GetComponentLocation();
     // Move down to the height of the box plus a small additional space.
-    FVector End = Start - FVector(0, 0, BoxComp->GetScaledBoxExtent().Z + 1.0f);
+    const FVector End = Start - FVector(0, 0, BoxComp->GetScaledBoxExtent().Z + 1.0f);
 
     FCollisionQueryParams QueryParams;
     QueryParams.AddIgnoredActor(ControlledPawn);
 
     FHitResult Hit;
-    bool bHit = GetWorld()->SweepSingleByChannel(
+    const bool bHit = GetWorld()->SweepSingleByChannel(
         Hit, Start, End, FQuat::Identity, ECC_Visibility, FCollisionShape::MakeBox(BoxComp->GetScaledBoxExtent()), QueryParams);
 
     return bHit;

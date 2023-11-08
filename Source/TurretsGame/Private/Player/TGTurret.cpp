@@ -13,8 +13,3 @@ ATGTurret::ATGTurret()
     SpringArmComp->SetupAttachment(GetRootComponent());
     CameraComp->SetupAttachment(SpringArmComp);
 }
-
-void ATGTurret::PostInitializeComponents()
-{
-    Super::PostInitializeComponents();
-}

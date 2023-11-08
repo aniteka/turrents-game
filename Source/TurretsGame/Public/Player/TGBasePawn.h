@@ -112,11 +112,14 @@ protected:
     float ShootSpeed = 1.f;
 
     UPROPERTY(EditDefaultsOnly, Category = "TG|Strength")
+    float MouseInputSpeedMultiply = 3.f;
+
+    UPROPERTY(EditDefaultsOnly, Category = "TG|Strength")
     float MinShootSpeedThreshold = 0.2f;
 
     UPROPERTY(EditDefaultsOnly, Category = "TG|Strength")
     float MaxShootSpeedThreshold = 1.f;
-    
+
 protected:
     virtual void Tick(float DeltaSeconds) override;
     virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
@@ -181,7 +184,7 @@ private:
     UFUNCTION()
     void OnHpChangeCallback(AActor* Actor, float NewHp, float Delta);
 
-    void SayToGameModeAboutDeath();
+    void NotifyGameModeAboutDeath();
     void UpdateHealthHUD();
     void TrySpawnFireBodyVFX();
     void PlayDeathVFX();
@@ -192,4 +195,6 @@ private:
     void StartRotateSound();
     void DeactivateRotationLoopComponent();
     void BindDelegates();
+    void HandleLookSound(float ValueX);
+    bool UpdateTGPlayerControllerVar();
 };

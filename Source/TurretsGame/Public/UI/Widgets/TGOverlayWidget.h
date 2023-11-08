@@ -47,6 +47,12 @@ public:
     UTextBlock* PauseText;
 
     UPROPERTY(meta = (BindWidget))
+    UBackgroundBlur* GameOverBlur;
+
+    UPROPERTY(meta = (BindWidget))
+    UTextBlock* GameOverText;
+
+    UPROPERTY(meta = (BindWidget))
     UButton* ResumeButton;
 
     UPROPERTY(meta = (BindWidget))

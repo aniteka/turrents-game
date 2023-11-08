@@ -22,7 +22,7 @@ public:
     virtual void HandleStartingNewPlayer_Implementation(APlayerController* NewPlayer) override;
 
     void EnemyDestroyed(AActor* EnemyToRemove);
-    void GameOver();
+    void GameOver(bool bWin);
 
 protected:
     UPROPERTY()
@@ -55,8 +55,14 @@ protected:
     UPROPERTY(EditDefaultsOnly, Category = "TG|GameMode properties")
     TSubclassOf<AActor> EnemyTurretClass;
 
+    UPROPERTY(EditDefaultsOnly, Category = "TG|GameMode properties")
+    float GameOverDelayInSec = 4.f;
+
     EGameType GameType = EGameType::EGT_PlayTank;
     TArray<AActor*> Enemies;
+
+private:
+    FTimerHandle GameOverTimerHandle;
 
 private:
     ATGPlayerController* GetTGPlayerController();
@@ -67,4 +73,5 @@ private:
     void SpawnEnemiesByGameType();
     void SpawnActorsByTransforms(TSubclassOf<AActor>& InClass, const TArray<FTransform>& Transforms);
     void RestartTurretGame();
+    void OnGameOverTimerFinished();
 };

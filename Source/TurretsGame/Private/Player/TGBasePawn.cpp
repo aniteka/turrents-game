@@ -119,7 +119,12 @@ void ATGBasePawn::Look(const FInputActionValue& InputValue)
     AddControllerYawInput(Value.X);
     AddControllerPitchInput(Value.Y);
 
-    if (FMath::Abs(Value.X) > RotationSoundInputThreshold)
+    HandleLookSound(Value.X);
+}
+
+void ATGBasePawn::HandleLookSound(float ValueX)
+{
+    if (FMath::Abs(ValueX) > RotationSoundInputThreshold)
     {
         if (!GetWorld() || GetWorld()->GetTimerManager().IsTimerActive(RotationSoundTimerHandle)) return;
 
@@ -159,10 +164,9 @@ void ATGBasePawn::ChangeGunRotator()
     Gun->SetRelativeRotation(GunRot, true);
 }
 
-void ATGBasePawn::Pause() 
+void ATGBasePawn::Pause()
 {
-    TGPlayerController = (!TGPlayerController) ? GetController<ATGPlayerController>() : TGPlayerController;
-    if (!TGPlayerController) return;
+    if (!UpdateTGPlayerControllerVar() || TGPlayerController->bGameOver) return;
 
     TGPlayerController->Pause();
 }
@@ -172,9 +176,8 @@ void ATGBasePawn::OnDeathCallback(AActor* Actor)
     if (!Actor || Actor != this) return;
 
     PlayDeathVFX();
-    SayToGameModeAboutDeath();
+    NotifyGameModeAboutDeath();
 }
-
 
 void ATGBasePawn::OnHpChangeCallback(AActor* Actor, float NewHp, float Delta)
 {
@@ -186,14 +189,15 @@ void ATGBasePawn::OnHpChangeCallback(AActor* Actor, float NewHp, float Delta)
 
 void ATGBasePawn::UpdateHealthHUD()
 {
-    TGPlayerController = (!TGPlayerController) ? GetController<ATGPlayerController>() : TGPlayerController;
-    if (!TGPlayerController) return;
+    if (!UpdateTGPlayerControllerVar()) return;
 
     TGPlayerController->SetPercentHealthBar(GetHealthPercent());
 }
 
-void ATGBasePawn::SayToGameModeAboutDeath()
+void ATGBasePawn::NotifyGameModeAboutDeath()
 {
+    if (!GetWorld() || !UGameplayStatics::GetGameMode(GetWorld())) return;
+
     auto GameMode = Cast<ATGGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
     if (!GameMode) return;
 
@@ -205,7 +209,7 @@ void ATGBasePawn::SayToGameModeAboutDeath()
     }
     else
     {
-        GameMode->GameOver();
+        GameMode->GameOver(false);
     }
 }
 
@@ -222,15 +226,15 @@ void ATGBasePawn::TrySpawnFireBodyVFX()
 {
     if (!BodyFireComponent && BodyFireSystem && GetHealthPercent() <= PercentToStartFire)
     {
-        BodyFireComponent = UNiagaraFunctionLibrary::SpawnSystemAttached( //
-            BodyFireSystem,                                               //
-            GetRootComponent(),                                           //
-            FName(),                                                      //
-            GetActorLocation(),                                           //
-            GetActorRotation(),                                           //
-            EAttachLocation::KeepWorldPosition,                           //
-            false                                                         //
-            );
+        BodyFireComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(  //
+            BodyFireSystem,                                                //
+            GetRootComponent(),                                            //
+            FName(),                                                       //
+            GetActorLocation(),                                            //
+            GetActorRotation(),                                            //
+            EAttachLocation::KeepWorldPosition,                            //
+            false                                                          //
+        );
     }
 }
 
@@ -279,12 +283,9 @@ void ATGBasePawn::CrosshairActivate(const FInputActionValue& InputValue)
 
 void ATGBasePawn::CrosshairDeactivate(const FInputActionValue& InputValue)
 {
-    TGPlayerController = (!TGPlayerController) ? GetController<ATGPlayerController>() : TGPlayerController;
-    if (TGPlayerController)
-    {
-        TGPlayerController->EnableEnemyHealthBar(false);
-    }
+    if (!UpdateTGPlayerControllerVar()) return;
 
+    TGPlayerController->EnableEnemyHealthBar(false);
     ClearCrosshair();
 }
 
@@ -295,10 +296,10 @@ void ATGBasePawn::ShootStrength(const FInputActionInstance& Instance)
     constexpr float ConvertPercentToValue = 100.f;
     const float AxisValue = Instance.GetValue().Get<float>();
 
-    ShootSpeed = FMath::Clamp(ShootSpeed + AxisValue / ConvertPercentToValue, MinShootSpeedThreshold, MaxShootSpeedThreshold);
+    ShootSpeed = FMath::Clamp(
+        ShootSpeed + AxisValue / ConvertPercentToValue * MouseInputSpeedMultiply, MinShootSpeedThreshold, MaxShootSpeedThreshold);
 
     static const float ProjectileSpeed = ShootComp->GetInitialProjectileSpeed();
-
     ShootComp->SetInitialProjectileSpeed(ProjectileSpeed * ShootSpeed);
 }
 
@@ -366,19 +367,18 @@ void ATGBasePawn::DrawCrosshair(FPredictProjectilePathResult& PredictResult)
 
         PointsArray.Add(SplineMeshComponent);
 
-        SplineMeshComponent->SetStartAndEnd(                                               //
-            PredictResult.PathData[i].Location,                                            //
-            SplineComponent->GetTangentAtSplinePoint(i, ESplineCoordinateSpace::World),    //
-            PredictResult.PathData[i + 1].Location,                                        //
-            SplineComponent->GetTangentAtSplinePoint(i + 1, ESplineCoordinateSpace::World) //
-            );
+        SplineMeshComponent->SetStartAndEnd(                                                //
+            PredictResult.PathData[i].Location,                                             //
+            SplineComponent->GetTangentAtSplinePoint(i, ESplineCoordinateSpace::World),     //
+            PredictResult.PathData[i + 1].Location,                                         //
+            SplineComponent->GetTangentAtSplinePoint(i + 1, ESplineCoordinateSpace::World)  //
+        );
     }
 }
 
 void ATGBasePawn::DrawEnemyHealthBar(FPredictProjectilePathResult& PredictResult)
 {
-    TGPlayerController = (!TGPlayerController) ? GetController<ATGPlayerController>() : TGPlayerController;
-    if (!TGPlayerController) return;
+    if (!UpdateTGPlayerControllerVar()) return;
 
     const auto CrosshairHitResult = PredictResult.HitResult;
     const bool bShowEnemyHealth = CrosshairHitResult.bBlockingHit && CrosshairHitResult.GetActor() &&
@@ -411,6 +411,12 @@ void ATGBasePawn::ClearCrosshair()
 
     if (!SphereHit) return;
     SphereHit->SetVisibility(false);
+}
+
+bool ATGBasePawn::UpdateTGPlayerControllerVar()
+{
+    TGPlayerController = (!TGPlayerController) ? GetController<ATGPlayerController>() : TGPlayerController;
+    return (TGPlayerController) ? true : false;
 }
 
 float ATGBasePawn::GetHealthPercent() const

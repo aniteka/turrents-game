@@ -12,13 +12,12 @@ class UImage;
 class USoundCue;
 
 UCLASS()
-class TURRETSGAME_API ATGPlayerController
-    : public APlayerController
-    , public IGenericTeamAgentInterface
+class TURRETSGAME_API ATGPlayerController : public APlayerController, public IGenericTeamAgentInterface
 {
     GENERATED_BODY()
 
 public:
+    void GameOver(bool bWin);
     void Pause();
     void GoToMenu();
     void SetInputModeGameOnly();
@@ -28,9 +27,12 @@ public:
     void SetPercentHealthBar(float Percent);
     void SetPercentEnemyHealthBar(float Percent);
 
+public:
+    bool bGameOver = false;
+
 protected:
     virtual void OnPossess(APawn* InPawn) override;
-    
+
 private:
     UPROPERTY(EditDefaultsOnly, Category = "TG|Sounds")
     USoundCue* BattleTheme;

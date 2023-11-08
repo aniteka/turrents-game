@@ -10,6 +10,7 @@ class UTGMenuWidget;
 class UTGOverlayWidget;
 class ATGBasePawn;
 class UImage;
+class ATGPlayerController;
 
 UCLASS()
 class TURRETSGAME_API ATG_HUD : public AHUD
@@ -26,11 +27,15 @@ public:
     UPROPERTY()
     UTGOverlayWidget* OverlayWidget;
 
+    UPROPERTY()
+    UTGMenuWidget* MenuWidget;
+
 public:
     virtual void BeginPlay() override;
     virtual void Tick(float DeltaSeconds) override;
 
     void Pause(bool bPaused);
+    void GameOver(bool bWin);
 
     void EnableBar(UImage* BarToEnable, bool bEnable);
     void SetPercentBar(float Percent, UImage* BarToChange);
@@ -39,8 +44,11 @@ public:
     void AddOverlayWidget();
 
 private:
-    UPROPERTY()
-    UTGMenuWidget* MenuWidget;
+    UPROPERTY(EditDefaultsOnly, Category = "TG|HUD")
+    FText WinMessage = FText::FromString(TEXT("YOU WIN!"));
+
+    UPROPERTY(EditDefaultsOnly, Category = "TG|HUD")
+    FText LoseMessage = FText::FromString(TEXT("YOU LOSE!"));
 
     UPROPERTY()
     ATGBasePawn* OwnerPawn;
@@ -55,4 +63,6 @@ private:
     void SelectWidgetByGameMode();
     void OverlayWidgetCreateHandle();
     bool UpdateOwnerPawnVar();
+    void ShowPauseComponents(const ESlateVisibility& Visibility);
+    ATGPlayerController* GetTGPlayerController();
 };

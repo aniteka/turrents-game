@@ -20,7 +20,7 @@ void UTGOverlayWidget::NativeConstruct()
 void UTGOverlayWidget::HideAllComponents()
 {
     bool bWidgetsValid = HealthBarImage && ShootDelayBarImage && SpeedBarImage && EnemyHealthBarImage && PauseBlur && PauseText &&
-                         ResumeButton && MenuButton && InstructionImage && InstructionBackgroundImage;
+                         ResumeButton && MenuButton && InstructionImage && InstructionBackgroundImage && GameOverBlur && GameOverText;
     if (!bWidgetsValid) return;
 
     HealthBarImage->SetVisibility(ESlateVisibility::Hidden);
@@ -33,6 +33,8 @@ void UTGOverlayWidget::HideAllComponents()
     MenuButton->SetVisibility(ESlateVisibility::Hidden);
     InstructionImage->SetVisibility(ESlateVisibility::Hidden);
     InstructionBackgroundImage->SetVisibility(ESlateVisibility::Hidden);
+    GameOverBlur->SetVisibility(ESlateVisibility::Hidden);
+    GameOverText->SetVisibility(ESlateVisibility::Hidden);
 }
 
 void UTGOverlayWidget::BindButtonsHovered()

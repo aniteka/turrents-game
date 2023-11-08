@@ -17,6 +17,16 @@ void ATGPlayerController::OnPossess(APawn* InPawn)
     PlayMusic();
 }
 
+void ATGPlayerController::GameOver(bool bWin)
+{
+    bGameOver = true;
+
+    UpdateHUDVar();
+    if (!TG_HUD) return;
+
+    TG_HUD->GameOver(bWin);
+}
+
 void ATGPlayerController::Pause()
 {
     UpdateHUDVar();
@@ -37,7 +47,7 @@ void ATGPlayerController::GoToMenu()
 void ATGPlayerController::EnableEnemyHealthBar(bool bEnable)
 {
     UpdateHUDVar();
-    if (!TG_HUD) return;
+    if (!TG_HUD || !TG_HUD->OverlayWidget || !TG_HUD->OverlayWidget->EnemyHealthBarImage) return;
 
     TG_HUD->EnableBar(TG_HUD->OverlayWidget->EnemyHealthBarImage, bEnable);
 }

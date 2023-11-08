@@ -20,12 +20,11 @@ public:
 
 protected:
     virtual void PostInitializeComponents() override;
-    virtual void BeginPlay() override;
 
 public:
     FORCEINLINE UStaticMeshComponent* GetStaticMeshComponent() const { return StaticMeshComponent; }
     FORCEINLINE UProjectileMovementComponent* GetProjectileMovementComponent() const { return ProjectileMovementComponent; }
-    
+
 protected:
     UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Components")
     UStaticMeshComponent* StaticMeshComponent;
@@ -47,9 +46,11 @@ protected:
 
     UPROPERTY(EditAnywhere, Category = "TG")
     float HitDamage = 10.f;
-    
+
 private:
     UFUNCTION()
-    void StaticMeshComponentEventHitCallback(UPrimitiveComponent* HitComponent, AActor* OtherActor,
-        UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
+    void StaticMeshComponentEventHitCallback(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
+        FVector NormalImpulse, const FHitResult& Hit);
+
+    void SpawnDestroyCosmetics();
 };

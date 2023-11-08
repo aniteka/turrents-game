@@ -24,7 +24,8 @@ void ATG_HUD::Tick(float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);
 
-    if (UpdateOwnerPawnVar() && OverlayWidget)
+    bool bCanUpdateBars = UpdateOwnerPawnVar() && OverlayWidget && OverlayWidget->ShootDelayBarImage && OverlayWidget->SpeedBarImage;
+    if (bCanUpdateBars)
     {
         SetPercentBar(OwnerPawn->GetShootDelayPercent(), OverlayWidget->ShootDelayBarImage);
         SetPercentBar(OwnerPawn->GetSpeedPercent(), OverlayWidget->SpeedBarImage);
@@ -39,27 +40,37 @@ void ATG_HUD::Pause(bool bPaused)
 
     if (bPaused)
     {
-        OverlayWidget->ResumeButton->SetVisibility(ESlateVisibility::Visible);
-        OverlayWidget->MenuButton->SetVisibility(ESlateVisibility::Visible);
-        OverlayWidget->PauseText->SetVisibility(ESlateVisibility::Visible);
-        OverlayWidget->PauseBlur->SetVisibility(ESlateVisibility::Visible);
-        OverlayWidget->InstructionImage->SetVisibility(ESlateVisibility::Visible);
-        OverlayWidget->InstructionBackgroundImage->SetVisibility(ESlateVisibility::Visible);
+        ShowPauseComponents(ESlateVisibility::Visible);
     }
     else
     {
-        OverlayWidget->ResumeButton->SetVisibility(ESlateVisibility::Hidden);
-        OverlayWidget->MenuButton->SetVisibility(ESlateVisibility::Hidden);
-        OverlayWidget->PauseText->SetVisibility(ESlateVisibility::Hidden);
-        OverlayWidget->PauseBlur->SetVisibility(ESlateVisibility::Hidden);
-        OverlayWidget->InstructionImage->SetVisibility(ESlateVisibility::Hidden);
-        OverlayWidget->InstructionBackgroundImage->SetVisibility(ESlateVisibility::Hidden);
+        ShowPauseComponents(ESlateVisibility::Hidden);
+    }
+}
+
+void ATG_HUD::GameOver(bool bWin) 
+{
+    if (!OverlayWidget || !OverlayWidget->GameOverBlur || !OverlayWidget->GameOverText) return;
+
+    OverlayWidget->GameOverBlur->SetVisibility(ESlateVisibility::Visible);
+    OverlayWidget->GameOverText->SetVisibility(ESlateVisibility::Visible);
+
+    if (bWin)
+    {
+        OverlayWidget->GameOverText->SetText(WinMessage);
+        OverlayWidget->GameOverText->SetColorAndOpacity(FLinearColor::Green);
+        
+    }
+    else
+    {
+        OverlayWidget->GameOverText->SetText(LoseMessage);
+        OverlayWidget->GameOverText->SetColorAndOpacity(FLinearColor::Red);
     }
 }
 
 void ATG_HUD::AddMenuWidget()
 {
-    if (!GetOwningPlayerController()) return;
+    if (!GetOwningPlayerController() && MenuWidgetClass) return;
 
     MenuWidget = CreateWidget<UTGMenuWidget>(GetOwningPlayerController(), MenuWidgetClass);
     if (!MenuWidget) return;
@@ -69,7 +80,7 @@ void ATG_HUD::AddMenuWidget()
 
 void ATG_HUD::AddOverlayWidget()
 {
-    if (!GetOwningPlayerController()) return;
+    if (!GetOwningPlayerController() && OverlayWidgetClass) return;
 
     OverlayWidget = CreateWidget<UTGOverlayWidget>(GetOwningPlayerController(), OverlayWidgetClass);
     if (!OverlayWidget) return;
@@ -77,25 +88,21 @@ void ATG_HUD::AddOverlayWidget()
     OverlayWidget->AddToViewport();
 }
 
-void ATG_HUD::OnResumeButtonClicked() 
+void ATG_HUD::OnResumeButtonClicked()
 {
     Pause(false);
 
-    auto TGPlayerController = Cast<ATGPlayerController>(GetOwningPlayerController());
-    if (!TGPlayerController) return;
-
-    TGPlayerController->SetInputModeGameOnly();
+    if (!GetTGPlayerController()) return;
+    GetTGPlayerController()->SetInputModeGameOnly();
 }
 
 void ATG_HUD::OnMenuButtonClicked()
 {
-    auto TGPlayerController = Cast<ATGPlayerController>(GetOwningPlayerController());
-    if (!TGPlayerController) return;
-
-    TGPlayerController->GoToMenu();
+    if (!GetTGPlayerController()) return;
+    GetTGPlayerController()->GoToMenu();
 }
 
-void ATG_HUD::SelectWidgetByGameMode() 
+void ATG_HUD::SelectWidgetByGameMode()
 {
     if (!GetWorld()) return;
 
@@ -123,8 +130,12 @@ void ATG_HUD::SelectWidgetByGameMode()
 
 void ATG_HUD::OverlayWidgetCreateHandle()
 {
+    if (!GetOwningPawn()) return;
+
     ATGTank* PlayerTank = Cast<ATGTank>(GetOwningPawn());
-    if (PlayerTank)
+    bool bValidImages = OverlayWidget && OverlayWidget->HealthBarImage && OverlayWidget->ShootDelayBarImage && OverlayWidget->SpeedBarImage;
+
+    if (PlayerTank && bValidImages)
     {
         EnableBar(OverlayWidget->HealthBarImage, true);
         EnableBar(OverlayWidget->ShootDelayBarImage, true);
@@ -132,7 +143,7 @@ void ATG_HUD::OverlayWidgetCreateHandle()
 
         SetPercentBar(PlayerTank->GetHealthPercent(), OverlayWidget->HealthBarImage);
     }
-    else
+    else if (bValidImages)
     {
         ATGTurret* PlayerTurret = Cast<ATGTurret>(GetOwningPawn());
         if (!PlayerTurret) return;
@@ -144,13 +155,13 @@ void ATG_HUD::OverlayWidgetCreateHandle()
 
 void ATG_HUD::EnableBar(UImage* BarToEnable, bool bEnable)
 {
-    if (!OverlayWidget || !BarToEnable) return;
+    if (!BarToEnable) return;
     (bEnable) ? BarToEnable->SetVisibility(ESlateVisibility::Visible) : BarToEnable->SetVisibility(ESlateVisibility::Hidden);
 }
 
 void ATG_HUD::SetPercentBar(float Percent, UImage* BarToChange)
 {
-    if (!OverlayWidget || !BarToChange || BarToChange->GetVisibility() != ESlateVisibility::Visible) return;
+    if (!BarToChange || BarToChange->GetVisibility() != ESlateVisibility::Visible) return;
 
     auto DymMaterial = BarToChange->GetDynamicMaterial();
     if (!DymMaterial) return;
@@ -162,4 +173,20 @@ bool ATG_HUD::UpdateOwnerPawnVar()
 {
     OwnerPawn = (!OwnerPawn) ? Cast<ATGBasePawn>(GetOwningPawn()) : OwnerPawn;
     return OwnerPawn ? true : false;
+}
+
+void ATG_HUD::ShowPauseComponents(const ESlateVisibility& Visibility)
+{
+    OverlayWidget->ResumeButton->SetVisibility(Visibility);
+    OverlayWidget->MenuButton->SetVisibility(Visibility);
+    OverlayWidget->PauseText->SetVisibility(Visibility);
+    OverlayWidget->PauseBlur->SetVisibility(Visibility);
+    OverlayWidget->InstructionImage->SetVisibility(Visibility);
+    OverlayWidget->InstructionBackgroundImage->SetVisibility(Visibility);
+}
+
+ATGPlayerController* ATG_HUD::GetTGPlayerController()
+{
+    if (!GetOwningPlayerController()) return nullptr;
+    return Cast<ATGPlayerController>(GetOwningPlayerController());
 }

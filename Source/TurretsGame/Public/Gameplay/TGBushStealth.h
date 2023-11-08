@@ -14,15 +14,12 @@ class TURRETSGAME_API ATGBushStealth : public AActor
     GENERATED_BODY()
 
 public:
-
     ATGBushStealth();
 
 protected:
-
     UPROPERTY(EditDefaultsOnly, Category = "Components")
     USphereComponent* SphereCollision;
 
     UPROPERTY(EditDefaultsOnly, Category = "Components")
     UStaticMeshComponent* MeshComponent;
-
 };

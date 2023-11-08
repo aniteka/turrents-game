@@ -22,9 +22,9 @@ public:
     void AddImpulse(float PowerInput);
 
     /**
-    * Rotate object when power != 0
-    * @param PowerInput Expected Value from Key Input [-1.0, 1.0]
-    */
+     * Rotate object when power != 0
+     * @param PowerInput Expected Value from Key Input [-1.0, 1.0]
+     */
     void AddImpulseRotate(float PowerInput);
 
     virtual bool HasGroundContact() const;
@@ -83,6 +83,5 @@ private:
     FTimerManager& GetWorldTimerManager() const;
 
     void ResetLastPowerInput_Elapsed();
-
     void AddImpulseMovement(float DeltaTime);
 };

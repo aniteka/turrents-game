@@ -50,14 +50,16 @@ void ATGGameMode::EnemyDestroyed(AActor* EnemyToRemove)
 
     if (IsAllEnemiesDestroyed())
     {
-        GameOver();
+        GameOver(true);
     }
 }
 
-void ATGGameMode::GameOver()
+void ATGGameMode::GameOver(bool bWin)
 {
-    if (!GetTGGameInstance()) return;
-    UGameplayStatics::OpenLevel(this, GetTGGameInstance()->MenuMapName);
+    if (!GetTGPlayerController() || !GetWorld() || GetWorld()->GetTimerManager().IsTimerActive(GameOverTimerHandle)) return;
+    GetTGPlayerController()->GameOver(bWin);
+
+    GetWorld()->GetTimerManager().SetTimer(GameOverTimerHandle, this, &ATGGameMode::OnGameOverTimerFinished, GameOverDelayInSec);
 }
 
 ATGPlayerController* ATGGameMode::GetTGPlayerController()
@@ -124,4 +126,10 @@ void ATGGameMode::RestartTurretGame()
 {
     SpawnPlayerByGameType();
     SpawnEnemiesByGameType();
+}
+
+void ATGGameMode::OnGameOverTimerFinished() 
+{
+    if (!GetTGGameInstance()) return;
+    UGameplayStatics::OpenLevel(this, GetTGGameInstance()->MenuMapName);
 }

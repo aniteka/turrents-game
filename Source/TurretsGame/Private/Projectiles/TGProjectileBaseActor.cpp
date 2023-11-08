@@ -19,22 +19,30 @@ ATGProjectileBaseActor::ATGProjectileBaseActor()
     ProjectileMovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>("ProjectileMovementComponent");
 }
 
-void ATGProjectileBaseActor::BeginPlay()
-{
-    Super::BeginPlay();
-
-    check(GetInstigator());
-}
-
 void ATGProjectileBaseActor::PostInitializeComponents()
 {
     Super::PostInitializeComponents();
 
-    StaticMeshComponent->OnComponentHit.AddDynamic(this, &ATGProjectileBaseActor::StaticMeshComponentEventHitCallback);
+    if (StaticMeshComponent)
+    {
+        StaticMeshComponent->OnComponentHit.AddDynamic(this, &ATGProjectileBaseActor::StaticMeshComponentEventHitCallback);
+    }
 }
 
 void ATGProjectileBaseActor::StaticMeshComponentEventHitCallback(
     UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
+{
+    SpawnDestroyCosmetics();
+
+    if (!OtherActor || GetInstigator() == OtherActor) return;
+
+    UGameplayStatics::ApplyPointDamage(
+        OtherActor, HitDamage, FVector::ZeroVector, Hit, GetInstigator()->GetController(), this, UDamageType::StaticClass());
+
+    this->Destroy();
+}
+
+void ATGProjectileBaseActor::SpawnDestroyCosmetics() 
 {
     if (ExplosionSound && ExplosionSystem && SmokeExplSystem)
     {
@@ -44,11 +52,4 @@ void ATGProjectileBaseActor::StaticMeshComponentEventHitCallback(
         UNiagaraFunctionLibrary::SpawnSystemAtLocation(
             this, SmokeExplSystem, GetActorLocation(), GetActorRotation(), FVector(ExplosionScale));
     }
-
-    if (!OtherActor || GetInstigator() == OtherActor) return;
-
-    UGameplayStatics::ApplyPointDamage(
-        OtherActor, HitDamage, FVector::ZeroVector, Hit, GetInstigator()->GetController(), this, UDamageType::StaticClass());
-
-    this->Destroy();
 }
