@@ -30,6 +30,8 @@ public:
     virtual void BeginPlay() override;
     virtual void Tick(float DeltaSeconds) override;
 
+    void Pause(bool bPaused);
+
     void EnableBar(UImage* BarToEnable, bool bEnable);
     void SetPercentBar(float Percent, UImage* BarToChange);
 
@@ -44,7 +46,13 @@ private:
     ATGBasePawn* OwnerPawn;
 
 private:
-    void OverlayWidgetCreateHandle();
+    UFUNCTION()
+    void OnResumeButtonClicked();
 
+    UFUNCTION()
+    void OnMenuButtonClicked();
+
+    void SelectWidgetByGameMode();
+    void OverlayWidgetCreateHandle();
     bool UpdateOwnerPawnVar();
 };

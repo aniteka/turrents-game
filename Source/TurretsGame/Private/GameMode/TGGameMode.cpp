@@ -6,6 +6,7 @@
 #include "GameInstance/TGGameInstance.h"
 #include "UI/HUD/TG_HUD.h"
 #include "Kismet/GameplayStatics.h"
+#include "AIController.h"
 
 ATGGameMode::ATGGameMode()
 {
@@ -104,8 +105,16 @@ void ATGGameMode::SpawnActorsByTransforms(TSubclassOf<AActor>& InClass, const TA
 
     for (const FTransform& TransformForSpawn : Transforms)
     {
-        AActor* NewEnemy = World->SpawnActor<AActor>(InClass, TransformForSpawn);
+        FActorSpawnParameters SpawnParams;
+        SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+        APawn* NewEnemy = World->SpawnActor<APawn>(InClass, TransformForSpawn, SpawnParams);
         if (!NewEnemy) continue;
+
+        AAIController* EnemyController = NewEnemy->GetController<AAIController>();
+        if (!EnemyController) continue;
+
+        EnemyController->SetFocalPoint(NewEnemy->GetActorLocation() + NewEnemy->GetActorForwardVector());
 
         Enemies.Add(NewEnemy);
     }

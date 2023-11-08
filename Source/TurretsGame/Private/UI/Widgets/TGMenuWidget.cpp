@@ -3,15 +3,24 @@
 #include "UI/Widgets/TGMenuWidget.h"
 #include "Components/Button.h"
 #include "Player/TGMenuPlayerController.h"
+#include "Kismet/GameplayStatics.h"
+#include "Sound/SoundCue.h"
 
 void UTGMenuWidget::NativeConstruct()
 {
     Super::NativeConstruct();
 
+    BindButtons();
+}
+
+void UTGMenuWidget::BindButtons()
+{
     if (!PlayTankButton || !PlayTurretButton) return;
 
     PlayTankButton->OnClicked.AddDynamic(this, &UTGMenuWidget::OnPlayTankButtonClicked);
     PlayTurretButton->OnClicked.AddDynamic(this, &UTGMenuWidget::OnPlayTurretButtonClicked);
+    PlayTankButton->OnHovered.AddDynamic(this, &UTGMenuWidget::OnPlayTankButtonHovered);
+    PlayTurretButton->OnHovered.AddDynamic(this, &UTGMenuWidget::OnPlayTurretButtonHovered);
 }
 
 void UTGMenuWidget::OnPlayTankButtonClicked()
@@ -19,15 +28,31 @@ void UTGMenuWidget::OnPlayTankButtonClicked()
     StartPlayByGameType(EGameType::EGT_PlayTank);
 }
 
-void UTGMenuWidget::OnPlayTurretButtonClicked() 
+void UTGMenuWidget::OnPlayTurretButtonClicked()
 {
     StartPlayByGameType(EGameType::EGT_PlayTurret);
 }
 
-void UTGMenuWidget::StartPlayByGameType(EGameType Type) 
+void UTGMenuWidget::OnPlayTankButtonHovered()
+{
+    PlayHoveredSound();
+}
+
+void UTGMenuWidget::OnPlayTurretButtonHovered()
+{
+    PlayHoveredSound();
+}
+
+void UTGMenuWidget::StartPlayByGameType(EGameType Type)
 {
     auto Controller = Cast<ATGMenuPlayerController>(GetOwningPlayer());
     if (!Controller) return;
 
     Controller->StartPlayByGameType(Type);
+}
+
+void UTGMenuWidget::PlayHoveredSound()
+{
+    if (!HoveredSound) return;
+    UGameplayStatics::PlaySound2D(this, HoveredSound);
 }

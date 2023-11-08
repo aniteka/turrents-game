@@ -8,6 +8,10 @@
 
 class UProgressBar;
 class UImage;
+class UBackgroundBlur;
+class UTextBlock;
+class UButton;
+class USoundCue;
 
 UCLASS()
 class TURRETSGAME_API UTGOverlayWidget : public UUserWidget
@@ -29,4 +33,36 @@ public:
 
     UPROPERTY(meta = (BindWidget))
     UImage* EnemyHealthBarImage;
+
+    UPROPERTY(meta = (BindWidget))
+    UImage* InstructionImage;
+
+    UPROPERTY(meta = (BindWidget))
+    UImage* InstructionBackgroundImage;
+
+    UPROPERTY(meta = (BindWidget))
+    UBackgroundBlur* PauseBlur;
+
+    UPROPERTY(meta = (BindWidget))
+    UTextBlock* PauseText;
+
+    UPROPERTY(meta = (BindWidget))
+    UButton* ResumeButton;
+
+    UPROPERTY(meta = (BindWidget))
+    UButton* MenuButton;
+
+    UPROPERTY(EditDefaultsOnly, Category = "TG|Sounds")
+    USoundCue* HoveredSound;
+
+private:
+    UFUNCTION()
+    void OnResumeButtonHovered();
+
+    UFUNCTION()
+    void OnMenuButtonHovered();
+
+    void HideAllComponents();
+    void BindButtonsHovered();
+    void PlayHoveredSound();
 };

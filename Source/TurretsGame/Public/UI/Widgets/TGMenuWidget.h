@@ -8,6 +8,7 @@
 #include "TGMenuWidget.generated.h"
 
 class UButton;
+class USoundCue;
 
 UCLASS()
 class TURRETSGAME_API UTGMenuWidget : public UUserWidget
@@ -21,6 +22,9 @@ public:
     UPROPERTY(meta = (BindWidget))
     UButton* PlayTurretButton;
 
+    UPROPERTY(EditDefaultsOnly, Category = "TG|Sounds")
+    USoundCue* HoveredSound;
+
 protected:
     virtual void NativeConstruct() override;
 
@@ -31,5 +35,13 @@ private:
     UFUNCTION()
     void OnPlayTurretButtonClicked();
 
+    UFUNCTION()
+    void OnPlayTankButtonHovered();
+
+    UFUNCTION()
+    void OnPlayTurretButtonHovered();
+
     void StartPlayByGameType(EGameType Type);
+    void BindButtons();
+    void PlayHoveredSound();
 };

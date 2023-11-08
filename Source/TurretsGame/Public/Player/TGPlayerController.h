@@ -19,8 +19,12 @@ class TURRETSGAME_API ATGPlayerController
     GENERATED_BODY()
 
 public:
-    void EnableEnemyHealthBar(bool bEnable);
+    void Pause();
+    void GoToMenu();
+    void SetInputModeGameOnly();
+    void SetInputModeUIOnly();
 
+    void EnableEnemyHealthBar(bool bEnable);
     void SetPercentHealthBar(float Percent);
     void SetPercentEnemyHealthBar(float Percent);
 
@@ -37,6 +41,5 @@ private:
 private:
     void SetPercentBar(float Percent, UImage* BarToChange);
     void UpdateHUDVar();
-    void SetInputModeGameOnly();
     void PlayMusic();
 };

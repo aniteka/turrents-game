@@ -4,31 +4,20 @@
 #include "UI/Widgets/TGMenuWidget.h"
 #include "UI/Widgets/TGOverlayWidget.h"
 #include "Components/Image.h"
+#include "Components/Button.h"
+#include "Components/TextBlock.h"
+#include "Components/BackgroundBlur.h"
 #include "GameMode/TGGameMode.h"
 #include "GameMode/TGMenuGameMode.h"
 #include "Player/TGTank.h"
 #include "Player/TGTurret.h"
+#include "Player/TGPlayerController.h"
 
 void ATG_HUD::BeginPlay()
 {
     Super::BeginPlay();
 
-    if (!GetWorld()) return;
-
-    const auto GameModeMenu = GetWorld()->GetAuthGameMode<ATGMenuGameMode>();
-    if (GameModeMenu)
-    {
-        AddMenuWidget();
-    }
-    else
-    {
-        const auto GameMode = GetWorld()->GetAuthGameMode<ATGGameMode>();
-        if (GameMode)
-        {
-            AddOverlayWidget();
-            OverlayWidgetCreateHandle();
-        }
-    }
+    SelectWidgetByGameMode();
 }
 
 void ATG_HUD::Tick(float DeltaSeconds)
@@ -39,6 +28,32 @@ void ATG_HUD::Tick(float DeltaSeconds)
     {
         SetPercentBar(OwnerPawn->GetShootDelayPercent(), OverlayWidget->ShootDelayBarImage);
         SetPercentBar(OwnerPawn->GetSpeedPercent(), OverlayWidget->SpeedBarImage);
+    }
+}
+
+void ATG_HUD::Pause(bool bPaused)
+{
+    bool bWidgets = OverlayWidget && OverlayWidget->ResumeButton && OverlayWidget->MenuButton && OverlayWidget->PauseText &&
+                    OverlayWidget->PauseBlur && OverlayWidget->InstructionImage && OverlayWidget->InstructionBackgroundImage;
+    if (!bWidgets) return;
+
+    if (bPaused)
+    {
+        OverlayWidget->ResumeButton->SetVisibility(ESlateVisibility::Visible);
+        OverlayWidget->MenuButton->SetVisibility(ESlateVisibility::Visible);
+        OverlayWidget->PauseText->SetVisibility(ESlateVisibility::Visible);
+        OverlayWidget->PauseBlur->SetVisibility(ESlateVisibility::Visible);
+        OverlayWidget->InstructionImage->SetVisibility(ESlateVisibility::Visible);
+        OverlayWidget->InstructionBackgroundImage->SetVisibility(ESlateVisibility::Visible);
+    }
+    else
+    {
+        OverlayWidget->ResumeButton->SetVisibility(ESlateVisibility::Hidden);
+        OverlayWidget->MenuButton->SetVisibility(ESlateVisibility::Hidden);
+        OverlayWidget->PauseText->SetVisibility(ESlateVisibility::Hidden);
+        OverlayWidget->PauseBlur->SetVisibility(ESlateVisibility::Hidden);
+        OverlayWidget->InstructionImage->SetVisibility(ESlateVisibility::Hidden);
+        OverlayWidget->InstructionBackgroundImage->SetVisibility(ESlateVisibility::Hidden);
     }
 }
 
@@ -60,6 +75,50 @@ void ATG_HUD::AddOverlayWidget()
     if (!OverlayWidget) return;
 
     OverlayWidget->AddToViewport();
+}
+
+void ATG_HUD::OnResumeButtonClicked() 
+{
+    Pause(false);
+
+    auto TGPlayerController = Cast<ATGPlayerController>(GetOwningPlayerController());
+    if (!TGPlayerController) return;
+
+    TGPlayerController->SetInputModeGameOnly();
+}
+
+void ATG_HUD::OnMenuButtonClicked()
+{
+    auto TGPlayerController = Cast<ATGPlayerController>(GetOwningPlayerController());
+    if (!TGPlayerController) return;
+
+    TGPlayerController->GoToMenu();
+}
+
+void ATG_HUD::SelectWidgetByGameMode() 
+{
+    if (!GetWorld()) return;
+
+    const auto GameModeMenu = GetWorld()->GetAuthGameMode<ATGMenuGameMode>();
+    if (GameModeMenu)
+    {
+        AddMenuWidget();
+    }
+    else
+    {
+        const auto GameMode = GetWorld()->GetAuthGameMode<ATGGameMode>();
+        if (GameMode)
+        {
+            AddOverlayWidget();
+            OverlayWidgetCreateHandle();
+
+            if (OverlayWidget && OverlayWidget->ResumeButton && OverlayWidget->MenuButton)
+            {
+                OverlayWidget->ResumeButton->OnClicked.AddDynamic(this, &ATG_HUD::OnResumeButtonClicked);
+                OverlayWidget->MenuButton->OnClicked.AddDynamic(this, &ATG_HUD::OnMenuButtonClicked);
+            }
+        }
+    }
 }
 
 void ATG_HUD::OverlayWidgetCreateHandle()

@@ -84,6 +84,9 @@ protected:
     UPROPERTY(EditDefaultsOnly, Category = "TG|Input")
     UInputAction* Input_Crosshair;
 
+    UPROPERTY(EditDefaultsOnly, Category = "TG|Input")
+    UInputAction* Input_Pause;
+
     UPROPERTY(EditDefaultsOnly, Category = "TG|Threshold", meta = (Units = "Degrees"))
     float GunPitchThreshold = 20.f;
 
@@ -113,6 +116,7 @@ protected:
     void CrosshairDeactivate(const FInputActionValue& InputValue);
     virtual void ChangeTowerRotator();
     virtual void ChangeGunRotator();
+    void Pause();
 
 private:
     UPROPERTY(EditDefaultsOnly, Category = "TG|Sounds")

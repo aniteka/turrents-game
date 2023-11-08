@@ -109,6 +109,7 @@ void ATGBasePawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
     InputComp->BindAction(Input_Look, ETriggerEvent::Completed, this, &ATGBasePawn::StopLook);
     InputComp->BindAction(Input_Crosshair, ETriggerEvent::Triggered, this, &ATGBasePawn::CrosshairActivate);
     InputComp->BindAction(Input_Crosshair, ETriggerEvent::Completed, this, &ATGBasePawn::CrosshairDeactivate);
+    InputComp->BindAction(Input_Pause, ETriggerEvent::Triggered, this, &ATGBasePawn::Pause);
 }
 
 void ATGBasePawn::Look(const FInputActionValue& InputValue)
@@ -154,6 +155,14 @@ void ATGBasePawn::ChangeGunRotator()
     GunRot.Pitch = FMath::ClampAngle(SpringArmComp->GetTargetRotation().Pitch, -GunPitchThreshold, GunPitchThreshold);
 
     Gun->SetRelativeRotation(GunRot, true);
+}
+
+void ATGBasePawn::Pause() 
+{
+    TGPlayerController = (!TGPlayerController) ? GetController<ATGPlayerController>() : TGPlayerController;
+    if (!TGPlayerController) return;
+
+    TGPlayerController->Pause();
 }
 
 void ATGBasePawn::OnDeathCallback(AActor* Actor)

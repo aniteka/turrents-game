@@ -6,6 +6,7 @@
 #include "UI/Widgets/TGOverlayWidget.h"
 #include "Kismet/GameplayStatics.h"
 #include "Sound/SoundCue.h"
+#include "GameInstance/TGGameInstance.h"
 
 void ATGPlayerController::OnPossess(APawn* InPawn)
 {
@@ -14,6 +15,23 @@ void ATGPlayerController::OnPossess(APawn* InPawn)
     SetGenericTeamId(TGTeamId::PlayerId);
     SetInputModeGameOnly();
     PlayMusic();
+}
+
+void ATGPlayerController::Pause()
+{
+    UpdateHUDVar();
+    if (!TG_HUD) return;
+
+    SetInputModeUIOnly();
+    TG_HUD->Pause(true);
+}
+
+void ATGPlayerController::GoToMenu() 
+{
+    auto TGGameInstance = GetGameInstance<UTGGameInstance>();
+    if (!TGGameInstance) return;
+
+    UGameplayStatics::OpenLevel(this, TGGameInstance->MenuMapName);
 }
 
 void ATGPlayerController::EnableEnemyHealthBar(bool bEnable)
@@ -51,6 +69,13 @@ void ATGPlayerController::SetPercentBar(float Percent, UImage* BarToChange)
 void ATGPlayerController::UpdateHUDVar()
 {
     TG_HUD = (!TG_HUD) ? GetHUD<ATG_HUD>() : TG_HUD;
+}
+
+void ATGPlayerController::SetInputModeUIOnly()
+{
+    FInputModeUIOnly InputModeUI;
+    SetInputMode(InputModeUI);
+    SetShowMouseCursor(true);
 }
 
 void ATGPlayerController::SetInputModeGameOnly()
