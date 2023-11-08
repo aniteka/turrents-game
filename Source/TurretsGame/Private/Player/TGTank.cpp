@@ -7,7 +7,6 @@
 #include "DrawDebugHelpers.h"
 #include "Components/BoxComponent.h"
 #include "Components/TGMovementComponent.h"
-#include "Gameplay/TGBushStealth.h"
 #include "Components/AudioComponent.h"
 #include "NiagaraComponent.h"
 #include "NiagaraFunctionLibrary.h"
@@ -37,35 +36,6 @@ ATGTank::ATGTank()
     MovementComp = CreateDefaultSubobject<UTGMovementComponent>(TEXT("MovementComp"));
 }
 
-void ATGTank::PostInitializeComponents()
-{
-    Super::PostInitializeComponents();
-
-    BushCollisionBox->OnComponentBeginOverlap.AddDynamic(this, &ATGTank::OnBushCollisionBeginOverlap);
-    BushCollisionBox->OnComponentEndOverlap.AddDynamic(this, &ATGTank::OnBushCollisionEndOverlap);
-}
-
-void ATGTank::OnBushCollisionBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
-    int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
-{
-    SetPawnVisibility(OtherActor, EGameplayVisibility::EPGS_Hidden);
-}
-
-void ATGTank::OnBushCollisionEndOverlap(
-    UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
-{
-    SetPawnVisibility(OtherActor, EGameplayVisibility::EPGS_Visible);
-}
-
-void ATGTank::SetPawnVisibility(AActor* OtherActor, EGameplayVisibility VisibilityState)
-{
-    if (!OtherActor) return;
-
-    if (!OtherActor->IsA(ATGBushStealth::StaticClass())) return;
-
-    PawnVisibility = VisibilityState;
-}
-
 void ATGTank::BeginPlay()
 {
     Super::BeginPlay();
@@ -90,6 +60,7 @@ void ATGTank::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
     InputComp->BindAction(Input_Move, ETriggerEvent::Triggered, this, &ATGTank::Move);
     InputComp->BindAction(Input_Move, ETriggerEvent::Completed, this, &ATGTank::StopMove);
+
 }
 
 void ATGTank::Move(const FInputActionInstance& Instance)
@@ -124,6 +95,8 @@ void ATGTank::ChangeTowerRotator()
     FRotator TowerRot = Tower->GetRelativeRotation();
     TowerRot.Yaw = SpringArmComp->GetTargetRotation().Yaw - Foundation->GetRelativeRotation().Yaw;
 
+    TowerRot = FMath::RInterpTo(Tower->GetRelativeRotation(), TowerRot, GetWorld()->DeltaTimeSeconds, TurnRate);
+
     Tower->SetRelativeRotation(TowerRot, true);
 }
 
@@ -131,15 +104,15 @@ void ATGTank::ActivateRoadSmokeSystem()
 {
     if (!RoadSmokeSystem || RoadSmokeComponent || !MovementComp) return;
 
-    RoadSmokeComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(  //
-        RoadSmokeSystem,                                                //
-        Foundation,                                                     //
-        MovementComp->GetBackwardSocketName(),                          //
-        GetActorLocation(),                                             //
-        GetActorRotation(),                                             //
-        EAttachLocation::KeepWorldPosition,                             //
-        false                                                           //
-    );
+    RoadSmokeComponent = UNiagaraFunctionLibrary::SpawnSystemAttached( //
+        RoadSmokeSystem,                                               //
+        Foundation,                                                    //
+        MovementComp->GetBackwardSocketName(),                         //
+        GetActorLocation(),                                            //
+        GetActorRotation(),                                            //
+        EAttachLocation::KeepWorldPosition,                            //
+        false                                                          //
+        );
 }
 
 void ATGTank::DeactivateRoadSmokeSystem()
@@ -203,6 +176,6 @@ void ATGTank::PrimaryAttack()
     {
         GetWorldTimerManager().SetTimer(TimerShootPayoff, this, &ATGTank::ShootPayoff, DelayShootPayoff);
     }
-    
+
     Super::PrimaryAttack();
 }
