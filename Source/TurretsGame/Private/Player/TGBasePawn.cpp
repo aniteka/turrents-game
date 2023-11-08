@@ -286,7 +286,7 @@ void ATGBasePawn::ShootStrength(const FInputActionInstance& Instance)
     constexpr float ConvertPercentToValue = 100.f;
     const float AxisValue = Instance.GetValue().Get<float>();
 
-    ShootSpeed = FMath::Clamp(ShootSpeed + AxisValue / ConvertPercentToValue, 0.f, 1.f);
+    ShootSpeed = FMath::Clamp(ShootSpeed + AxisValue / ConvertPercentToValue, MinShootSpeedThreshold, MaxShootSpeedThreshold);
 
     static const float ProjectileSpeed = ShootComp->GetInitialProjectileSpeed();
 

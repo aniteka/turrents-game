@@ -108,6 +108,12 @@ protected:
     UPROPERTY(EditDefaultsOnly, Category = "TG|Strength")
     float ShootSpeed = 1.f;
 
+    UPROPERTY(EditDefaultsOnly, Category = "TG|Strength")
+    float MinShootSpeedThreshold = 0.2f;
+
+    UPROPERTY(EditDefaultsOnly, Category = "TG|Strength")
+    float MaxShootSpeedThreshold = 1.f;
+    
 protected:
     virtual void Tick(float DeltaSeconds) override;
     virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
