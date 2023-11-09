@@ -9,6 +9,16 @@
 
 class ATGPlayerController;
 class UTGGameInstance;
+class ATGBasePawn;
+
+USTRUCT()
+struct FTankPath
+{
+    GENERATED_USTRUCT_BODY()
+
+    UPROPERTY(EditDefaultsOnly, Category = "TG|GameMode properties")
+    TArray<FVector> Path;
+};
 
 UCLASS()
 class TURRETSGAME_API ATGGameMode : public AGameMode
@@ -21,7 +31,7 @@ public:
     virtual void InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage) override;
     virtual void HandleStartingNewPlayer_Implementation(APlayerController* NewPlayer) override;
 
-    void EnemyDestroyed(AActor* EnemyToRemove);
+    void EnemyDestroyed(ATGBasePawn* EnemyToRemove);
     void GameOver(bool bWin);
 
 protected:
@@ -44,22 +54,25 @@ protected:
     TArray<FTransform> EnemyTanksTransform;
 
     UPROPERTY(EditDefaultsOnly, Category = "TG|GameMode properties")
-    TSubclassOf<AActor> PlayerTankClass;
+    TArray<FTankPath> EnemyTanksPoints;
 
     UPROPERTY(EditDefaultsOnly, Category = "TG|GameMode properties")
-    TSubclassOf<AActor> PlayerTurretClass;
+    TSubclassOf<ATGBasePawn> PlayerTankClass;
 
     UPROPERTY(EditDefaultsOnly, Category = "TG|GameMode properties")
-    TSubclassOf<AActor> EnemyTankClass;
+    TSubclassOf<ATGBasePawn> PlayerTurretClass;
 
     UPROPERTY(EditDefaultsOnly, Category = "TG|GameMode properties")
-    TSubclassOf<AActor> EnemyTurretClass;
+    TSubclassOf<ATGBasePawn> EnemyTankClass;
+
+    UPROPERTY(EditDefaultsOnly, Category = "TG|GameMode properties")
+    TSubclassOf<ATGBasePawn> EnemyTurretClass;
 
     UPROPERTY(EditDefaultsOnly, Category = "TG|GameMode properties")
     float GameOverDelayInSec = 4.f;
 
     EGameType GameType = EGameType::EGT_PlayTank;
-    TArray<AActor*> Enemies;
+    TArray<ATGBasePawn*> Enemies;
 
 private:
     FTimerHandle GameOverTimerHandle;
@@ -71,7 +84,8 @@ private:
 
     void SpawnPlayerByGameType();
     void SpawnEnemiesByGameType();
-    void SpawnActorsByTransforms(TSubclassOf<AActor>& InClass, const TArray<FTransform>& Transforms);
+    void SpawnActorsByTransforms(TSubclassOf<ATGBasePawn>& InClass, const TArray<FTransform>& Transforms);
+    void SetPathsForEnemyTanks();
     void RestartTurretGame();
     void OnGameOverTimerFinished();
 };

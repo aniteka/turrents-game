@@ -22,6 +22,9 @@ public:
     UPROPERTY(meta = (BindWidget))
     UButton* PlayTurretButton;
 
+    UPROPERTY(meta = (BindWidget))
+    UButton* ExitButton;
+
     UPROPERTY(EditDefaultsOnly, Category = "TG|Sounds")
     USoundCue* HoveredSound;
 
@@ -36,10 +39,16 @@ private:
     void OnPlayTurretButtonClicked();
 
     UFUNCTION()
+    void OnExitButtonClicked();
+
+    UFUNCTION()
     void OnPlayTankButtonHovered();
 
     UFUNCTION()
     void OnPlayTurretButtonHovered();
+
+    UFUNCTION()
+    void OnExitButtonHovered();
 
     void StartPlayByGameType(EGameType Type);
     void BindButtons();

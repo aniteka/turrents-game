@@ -20,6 +20,7 @@ ATGProjectileBaseActor::ATGProjectileBaseActor()
     SetRootComponent(SphereCollision);
 
     StaticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>("StaticMesh");
+    StaticMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
     StaticMeshComponent->SetupAttachment(GetRootComponent());
 
     ProjectileMovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>("ProjectileMovementComponent");

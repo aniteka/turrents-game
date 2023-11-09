@@ -76,6 +76,15 @@ protected:
     UPROPERTY(EditDefaultsOnly, Category = "TG|Movement")
     FName BackwardSocketName = FName(TEXT("BackwardPowerPoint"));
 
+    UPROPERTY(EditDefaultsOnly, Category = "TG|Movement|AI")
+    float RequestMovementImpulseForward = 1.f;
+
+    UPROPERTY(EditDefaultsOnly, Category = "TG|Movement|AI")
+    float RequestMovementImpulseRotate = 1.f;
+
+    UPROPERTY(EditDefaultsOnly, Category = "TG|Movement|AI")
+    float ConcentrateAngle = 1.f;
+
 protected:
     FORCEINLINE float GetLastPowerInput() const { return LastPowerInput; };
 

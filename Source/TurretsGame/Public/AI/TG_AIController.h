@@ -19,7 +19,9 @@ public:
     ATG_AIController(const FObjectInitializer& ObjectInitializer);
 
     virtual ETeamAttitude::Type GetTeamAttitudeTowards(const AActor& Other) const override;
-    
+
+    FORCEINLINE UTG_AIMovementSplineComponent* GetAIMovementSplineComponent() const { return AIMovementSplineComponent; }
+
 protected:
     virtual void OnPossess(APawn* InPawn) override;
     virtual void OnUnPossess() override;
@@ -29,15 +31,17 @@ protected:
 protected:
     UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Components")
     UAIPerceptionComponent* TGPerceptionComponent;
+
     UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Components")
     UTG_AIMovementSplineComponent* AIMovementSplineComponent;
-    
+
 protected:
     UPROPERTY(EditAnywhere, Category = "TG")
     float GunRotationInterpSpeed = 30.f;
+
     UPROPERTY(EditAnywhere, Category = "TG")
     bool bCanShoot = true;
-    
+
 private:
     UFUNCTION()
     void PerceptionUpdatedCallback(const FActorPerceptionUpdateInfo& UpdateInfo);
@@ -47,6 +51,8 @@ private:
     void EndShooting(AActor* Actor);
     void ShootingCallback();
 
+    UPROPERTY()
     ATGBasePawn* BasePawn = nullptr;
+
     FTimerHandle ShootingTimerHandle;
 };

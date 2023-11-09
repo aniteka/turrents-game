@@ -34,6 +34,7 @@ public:
     FORCEINLINE UTGShootComponent* GetShootComponent() const { return ShootComp; }
     FORCEINLINE UTGHealthComponent* GetHealthComponent() const { return HealthComp; }
     FORCEINLINE UStaticMeshComponent* GetGunStaticMeshComponent() const { return Gun; }
+    FORCEINLINE UStaticMeshComponent* GetTowerStaticMeshComponent() const { return Tower; }
 
     virtual void PrimaryAttack();
     virtual float GetHealthPercent() const;

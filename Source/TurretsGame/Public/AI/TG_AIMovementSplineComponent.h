@@ -6,11 +6,10 @@
 #include "Components/ActorComponent.h"
 #include "TG_AIMovementSplineComponent.generated.h"
 
-
 class AAIController;
 class AMovementSpline;
 
-UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
+UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class TURRETSGAME_API UTG_AIMovementSplineComponent : public UActorComponent
 {
     GENERATED_BODY()
@@ -30,11 +29,11 @@ public:
     void NextPointLocation();
 
 protected:
-    UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "TG")
-    TSoftObjectPtr<AMovementSpline> MovementSpline;
+    UPROPERTY()
+    AMovementSpline* MovementSpline;
 
     UPROPERTY(EditAnywhere, Category = "TG")
-    float CheckRadius = 100.f;
+    float CheckRadius = 400.f;
 
     UPROPERTY(EditAnywhere, Category = "TG")
     bool bCallMove = true;
@@ -42,6 +41,7 @@ protected:
 private:
     int32 IndexMovementSpline = 0;
 
+    UPROPERTY()
     AAIController* AIController = nullptr;
 
     void CheckCurrentPointLocation(float DeltaTime);

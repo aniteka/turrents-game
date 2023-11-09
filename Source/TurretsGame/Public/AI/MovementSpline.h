@@ -20,5 +20,5 @@ public:
 
 protected:
     UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Components")
-        USplineComponent* SplineComponent;
+    USplineComponent* SplineComponent;
 };

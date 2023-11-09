@@ -4,9 +4,12 @@
 #include "Player/TGTank.h"
 #include "Player/TGPlayerController.h"
 #include "GameInstance/TGGameInstance.h"
-#include "UI/HUD/TG_HUD.h"
 #include "Kismet/GameplayStatics.h"
-#include "AIController.h"
+#include "UI/HUD/TG_HUD.h"
+#include "AI/TG_AIController.h"
+#include "AI/TG_AIMovementSplineComponent.h"
+#include "AI/MovementSpline.h"
+#include "Components/SplineComponent.h"
 
 ATGGameMode::ATGGameMode()
 {
@@ -39,7 +42,7 @@ void ATGGameMode::HandleStartingNewPlayer_Implementation(APlayerController* NewP
     RestartTurretGame();
 }
 
-void ATGGameMode::EnemyDestroyed(AActor* EnemyToRemove)
+void ATGGameMode::EnemyDestroyed(ATGBasePawn* EnemyToRemove)
 {
     if (!EnemyToRemove) return;
 
@@ -93,12 +96,17 @@ void ATGGameMode::SpawnEnemiesByGameType()
 {
     switch (GameType)
     {
-        case EGameType::EGT_PlayTank: SpawnActorsByTransforms(EnemyTurretClass, EnemyTurretsTransform); break;
-        case EGameType::EGT_PlayTurret: SpawnActorsByTransforms(EnemyTankClass, EnemyTanksTransform); break;
+        case EGameType::EGT_PlayTank:  //
+            SpawnActorsByTransforms(EnemyTurretClass, EnemyTurretsTransform);
+            break;
+        case EGameType::EGT_PlayTurret:  //
+            SpawnActorsByTransforms(EnemyTankClass, EnemyTanksTransform);
+            SetPathsForEnemyTanks();
+            break;
     }
 }
 
-void ATGGameMode::SpawnActorsByTransforms(TSubclassOf<AActor>& InClass, const TArray<FTransform>& Transforms)
+void ATGGameMode::SpawnActorsByTransforms(TSubclassOf<ATGBasePawn>& InClass, const TArray<FTransform>& Transforms)
 {
     auto World = GetWorld();
     if (!World) return;
@@ -110,7 +118,7 @@ void ATGGameMode::SpawnActorsByTransforms(TSubclassOf<AActor>& InClass, const TA
         FActorSpawnParameters SpawnParams;
         SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
-        APawn* NewEnemy = World->SpawnActor<APawn>(InClass, TransformForSpawn, SpawnParams);
+        ATGBasePawn* NewEnemy = World->SpawnActor<ATGBasePawn>(InClass, TransformForSpawn, SpawnParams);
         if (!NewEnemy) continue;
 
         AAIController* EnemyController = NewEnemy->GetController<AAIController>();
@@ -122,13 +130,33 @@ void ATGGameMode::SpawnActorsByTransforms(TSubclassOf<AActor>& InClass, const TA
     }
 }
 
+void ATGGameMode::SetPathsForEnemyTanks()
+{
+    if (Enemies.Num() != EnemyTanksPoints.Num()) return;
+
+    int i = 0;
+    for (auto& EnemyTank : Enemies)
+    {
+        ATG_AIController* EnemyTankController = EnemyTank->GetController<ATG_AIController>();
+        if (!EnemyTankController || !EnemyTankController->GetAIMovementSplineComponent()) return;
+
+        AMovementSpline* MovementSpline = NewObject<AMovementSpline>();
+        if (!MovementSpline || !MovementSpline->GetSplineComponent()) return;
+
+        MovementSpline->GetSplineComponent()->SetSplinePoints(EnemyTanksPoints[i].Path, ESplineCoordinateSpace::World);
+        EnemyTankController->GetAIMovementSplineComponent()->SetMovementSpline(MovementSpline);
+
+        ++i;
+    }
+}
+
 void ATGGameMode::RestartTurretGame()
 {
     SpawnPlayerByGameType();
     SpawnEnemiesByGameType();
 }
 
-void ATGGameMode::OnGameOverTimerFinished() 
+void ATGGameMode::OnGameOverTimerFinished()
 {
     if (!GetTGGameInstance()) return;
     UGameplayStatics::OpenLevel(this, GetTGGameInstance()->MenuMapName);

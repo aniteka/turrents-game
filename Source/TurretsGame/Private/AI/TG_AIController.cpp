@@ -1,7 +1,6 @@
 // TurretGame by Team #1. AlphaNova courses
 
 #include "AI/TG_AIController.h"
-
 #include "AI/TG_AIMovementSplineComponent.h"
 #include "AI/TG_AITeams.h"
 #include "Components/TGShootComponent.h"
@@ -10,8 +9,7 @@
 #include "Perception/AIPerceptionComponent.h"
 #include "Player/TGBasePawn.h"
 
-ATG_AIController::ATG_AIController(const FObjectInitializer& ObjectInitializer)
-    : Super(ObjectInitializer)
+ATG_AIController::ATG_AIController(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
     PrimaryActorTick.bCanEverTick = true;
 
@@ -60,7 +58,7 @@ void ATG_AIController::UpdateControlRotation(float DeltaTime, bool bUpdatePawn)
     UGameplayStatics::SuggestProjectileVelocity(GetWorld(), Dir, BasePawn->GetActorLocation(), GetFocalPoint(),
         BasePawn->GetShootComponent()->GetInitialProjectileSpeed(), false, 0, 0, ESuggestProjVelocityTraceOption::DoNotTrace);
 
-    const auto OldControlRotation = GetControlRotation();
+    const auto OldControlRotation = GetControlRotation(); 
     const auto TargetControlRotation = Dir.GetSafeNormal().Rotation();
     const auto NewControlRotation =
         UKismetMathLibrary::RInterpTo_Constant(OldControlRotation, TargetControlRotation, DeltaTime, GunRotationInterpSpeed);
@@ -77,9 +75,15 @@ void ATG_AIController::PawnStartShooting()
         ShootingTimerHandle, this, &ATG_AIController::ShootingCallback, BasePawn->GetShootComponent()->GetShootDelayInSec(), true);
 }
 
+void ATG_AIController::ShootingCallback()
+{
+    if (!BasePawn) return;
+    BasePawn->PrimaryAttack();
+}
+
 void ATG_AIController::PawnEndShooting()
 {
-    if(!bCanShoot) return;
+    if (!bCanShoot) return;
     GetWorld()->GetTimerManager().ClearTimer(ShootingTimerHandle);
 }
 
@@ -90,12 +94,6 @@ void ATG_AIController::EndShooting(AActor* Actor)
     PawnEndShooting();
     ClearFocus(EAIFocusPriority::LastFocusPriority);
     SetFocalPoint(Actor->GetActorLocation());
-}
-
-void ATG_AIController::ShootingCallback()
-{
-    if (!BasePawn) return;
-    BasePawn->PrimaryAttack();
 }
 
 void ATG_AIController::PerceptionUpdatedCallback(const FActorPerceptionUpdateInfo& UpdateInfo)
