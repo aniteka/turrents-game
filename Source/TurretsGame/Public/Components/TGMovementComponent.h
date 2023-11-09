@@ -27,6 +27,9 @@ public:
      */
     void AddImpulseRotate(float PowerInput);
 
+    UFUNCTION(BlueprintCallable)
+    void RequestMoveTo(FVector Location);
+    
     virtual bool HasGroundContact() const;
 
     /** Returned percent, 0 -> 1 moving forward, 0 -> -1 moving back */

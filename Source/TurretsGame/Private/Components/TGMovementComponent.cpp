@@ -88,6 +88,31 @@ void UTGMovementComponent::AddImpulseRotate(float PowerInput)
     MyMeshComp->AddImpulseAtLocation(BackwardSocketDirection * SidewaysSpeed, MyMeshComp->GetSocketLocation(BackwardSocketName));
 }
 
+void UTGMovementComponent::RequestMoveTo(FVector Location)
+{
+    UStaticMeshComponent* FoundationComponent = Cast<UStaticMeshComponent>(GetPawnOwner()->GetRootComponent());
+    if (!FoundationComponent) return;
+
+    auto CurrentFoundationFwd = FoundationComponent->GetForwardVector();
+    CurrentFoundationFwd.Z = 0.;
+    CurrentFoundationFwd.Normalize();
+    
+    auto TargetDirection = Location - FoundationComponent->GetComponentLocation();
+    TargetDirection.Z = 0.;
+    TargetDirection.Normalize();
+    
+    AddImpulse(1.f);
+
+    /*
+     * TODO remove magic numbers
+     */
+    const double Angle = FMath::Acos(FVector::DotProduct(TargetDirection, CurrentFoundationFwd));
+    float ImpulseRotate = FVector::CrossProduct(TargetDirection, CurrentFoundationFwd).Z <= 0. ? 1. : -1.;
+    ImpulseRotate *= FMath::Clamp(0.1f, 1.f, Angle / PI);
+    if(Angle > 0.1)
+        AddImpulseRotate(ImpulseRotate);
+}
+
 bool UTGMovementComponent::HasGroundContact() const
 {
     const APawn* ControlledPawn = GetPawnOwner();
