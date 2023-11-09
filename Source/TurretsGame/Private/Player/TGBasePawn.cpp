@@ -119,7 +119,7 @@ void ATGBasePawn::Look(const FInputActionValue& InputValue)
     const FVector2D Value = InputValue.Get<FVector2D>();
 
     AddControllerYawInput(Value.X);
-    AddControllerPitchInput(Value.Y);
+    AddControllerPitchInput(-Value.Y);
 
     HandleLookSound(Value.X);
 }
