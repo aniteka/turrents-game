@@ -2,6 +2,7 @@
 
 #include "AI/TG_AIController.h"
 
+#include "AI/TG_AIMovementSplineComponent.h"
 #include "AI/TG_AITeams.h"
 #include "Components/TGShootComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -9,12 +10,16 @@
 #include "Perception/AIPerceptionComponent.h"
 #include "Player/TGBasePawn.h"
 
-ATG_AIController::ATG_AIController()
+ATG_AIController::ATG_AIController(const FObjectInitializer& ObjectInitializer)
+    : Super(ObjectInitializer)
 {
     PrimaryActorTick.bCanEverTick = true;
 
     TGPerceptionComponent = CreateDefaultSubobject<UAIPerceptionComponent>("TGPerceptionComponent");
     GetRootComponent()->SetUsingAbsoluteRotation(false);
+    SetPerceptionComponent(*TGPerceptionComponent);
+
+    AIMovementSplineComponent = CreateDefaultSubobject<UTG_AIMovementSplineComponent>("AIMovementSplineComponent");
 }
 
 ETeamAttitude::Type ATG_AIController::GetTeamAttitudeTowards(const AActor& Other) const
@@ -49,7 +54,7 @@ void ATG_AIController::OnUnPossess()
 
 void ATG_AIController::UpdateControlRotation(float DeltaTime, bool bUpdatePawn)
 {
-    if (!IsValid(BasePawn)) return;
+    if (!BasePawn || !BasePawn->GetShootComponent()) return;
 
     FVector Dir;
     UGameplayStatics::SuggestProjectileVelocity(GetWorld(), Dir, BasePawn->GetActorLocation(), GetFocalPoint(),
@@ -65,7 +70,7 @@ void ATG_AIController::UpdateControlRotation(float DeltaTime, bool bUpdatePawn)
 
 void ATG_AIController::PawnStartShooting()
 {
-    if (!IsValid(BasePawn)) return;
+    if (!BasePawn || !bCanShoot) return;
     if (GetWorld()->GetTimerManager().TimerExists(ShootingTimerHandle)) return;
 
     GetWorld()->GetTimerManager().SetTimer(
@@ -74,6 +79,7 @@ void ATG_AIController::PawnStartShooting()
 
 void ATG_AIController::PawnEndShooting()
 {
+    if(!bCanShoot) return;
     GetWorld()->GetTimerManager().ClearTimer(ShootingTimerHandle);
 }
 
@@ -88,7 +94,7 @@ void ATG_AIController::EndShooting(AActor* Actor)
 
 void ATG_AIController::ShootingCallback()
 {
-    if (!IsValid(BasePawn)) return;
+    if (!BasePawn) return;
     BasePawn->PrimaryAttack();
 }
 
