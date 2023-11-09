@@ -70,7 +70,7 @@ protected:
     FName ProjectileSocketToApplyImpulse = NAME_None;
 
     UPROPERTY(EditAnywhere, Category = "TG", DisplayName = "Set Life Span After Spawn?")
-    bool bProjectileSetLifeSpanAfterSpawn = false;
+    bool bProjectileSetLifeSpanAfterSpawn = true;
 
     UPROPERTY(EditAnywhere, Category = "TG", DisplayName = "Life Span In Sec",
         meta = (EditCondition = "bProjectileSetLifeSpanAfterSpawn", EditConditionHides))

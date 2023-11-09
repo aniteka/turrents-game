@@ -40,6 +40,8 @@ public:
     virtual float GetShootDelayPercent() const;
     virtual float GetSpeedPercent() const { return 0.f; };
 
+    bool IsDead();
+
 protected:
     UPROPERTY(EditDefaultsOnly, Category = "Components")
     UTGShootComponent* ShootComp;

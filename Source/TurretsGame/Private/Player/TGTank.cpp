@@ -65,7 +65,7 @@ void ATGTank::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 void ATGTank::Move(const FInputActionInstance& Instance)
 {
-    if (!MovementComp) return;
+    if (!MovementComp || IsDead()) return;
     const FVector2D AxisValue = Instance.GetValue().Get<FVector2D>();
 
     ActivateRoadSmokeSystem();
@@ -84,6 +84,8 @@ void ATGTank::Move(const FInputActionInstance& Instance)
 
 void ATGTank::StopMove(const FInputActionInstance& Instance)
 {
+    if (IsDead()) return;
+
     DeactivateRoadSmokeSystem();
     PlayIdleSound();
 }
@@ -172,7 +174,7 @@ void ATGTank::ShootPayoff()
 
 void ATGTank::PrimaryAttack()
 {
-    if (ShootComp && ShootComp->CanShootNow())
+    if (ShootComp && ShootComp->CanShootNow() && !IsDead())
     {
         GetWorldTimerManager().SetTimer(TimerShootPayoff, this, &ATGTank::ShootPayoff, DelayShootPayoff);
     }

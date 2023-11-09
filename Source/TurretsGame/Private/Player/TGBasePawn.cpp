@@ -114,6 +114,8 @@ void ATGBasePawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 
 void ATGBasePawn::Look(const FInputActionValue& InputValue)
 {
+    if (IsDead()) return;
+
     const FVector2D Value = InputValue.Get<FVector2D>();
 
     AddControllerYawInput(Value.X);
@@ -166,7 +168,7 @@ void ATGBasePawn::ChangeGunRotator()
 
 void ATGBasePawn::Pause()
 {
-    if (!UpdateTGPlayerControllerVar() || TGPlayerController->bGameOver) return;
+    if (!UpdateTGPlayerControllerVar() || TGPlayerController->bGameOver || IsDead()) return;
 
     TGPlayerController->Pause();
 }
@@ -248,7 +250,7 @@ void ATGBasePawn::PlayDeathVFX()
 
 void ATGBasePawn::PrimaryAttack()
 {
-    if (!ShootComp || !Gun) return;
+    if (!ShootComp || !Gun || IsDead()) return;
 
     ShootComp->ShootFromComponent(Gun, GunShootSocketName);
 }
@@ -272,6 +274,8 @@ void ATGBasePawn::DeactivateRotationLoopComponent()
 
 void ATGBasePawn::CrosshairActivate(const FInputActionValue& InputValue)
 {
+    if (IsDead()) return;
+
     ClearCrosshair();
 
     FPredictProjectilePathResult PredictResult;
@@ -283,7 +287,7 @@ void ATGBasePawn::CrosshairActivate(const FInputActionValue& InputValue)
 
 void ATGBasePawn::CrosshairDeactivate(const FInputActionValue& InputValue)
 {
-    if (!UpdateTGPlayerControllerVar()) return;
+    if (!UpdateTGPlayerControllerVar() || IsDead()) return;
 
     TGPlayerController->EnableEnemyHealthBar(false);
     ClearCrosshair();
@@ -291,7 +295,7 @@ void ATGBasePawn::CrosshairDeactivate(const FInputActionValue& InputValue)
 
 void ATGBasePawn::ShootStrength(const FInputActionInstance& Instance)
 {
-    if (!ShootComp) return;
+    if (!ShootComp || IsDead()) return;
 
     constexpr float ConvertPercentToValue = 100.f;
     const float AxisValue = Instance.GetValue().Get<float>();
@@ -429,4 +433,10 @@ float ATGBasePawn::GetShootDelayPercent() const
 {
     if (!ShootComp) return 0.f;
     return ShootComp->GetShootDelayPercent();
+}
+
+bool ATGBasePawn::IsDead()
+{
+    if (!HealthComp) return false;
+    return HealthComp->IsDead();
 }

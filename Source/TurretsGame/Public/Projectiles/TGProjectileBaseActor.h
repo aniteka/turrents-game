@@ -7,7 +7,9 @@
 #include "TGProjectileBaseActor.generated.h"
 
 class UProjectileMovementComponent;
+class USphereComponent;
 class UNiagaraSystem;
+class UNiagaraComponent;
 class USoundCue;
 
 UCLASS(Abstract, Blueprintable, BlueprintType)
@@ -17,6 +19,8 @@ class TURRETSGAME_API ATGProjectileBaseActor : public AActor
 
 public:
     ATGProjectileBaseActor();
+
+    virtual void BeginPlay() override;
 
 protected:
     virtual void PostInitializeComponents() override;
@@ -32,6 +36,9 @@ protected:
     UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Components")
     UProjectileMovementComponent* ProjectileMovementComponent;
 
+    UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Components")
+    USphereComponent* SphereCollision;
+
     UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "TG|Sounds")
     USoundCue* ExplosionSound;
 
@@ -42,10 +49,19 @@ protected:
     UNiagaraSystem* SmokeExplSystem;
 
     UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "TG|VFX")
+    UNiagaraSystem* TrailSystem;
+
+    UPROPERTY()
+    UNiagaraComponent* TrailComponent;
+
+    UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "TG|VFX")
     float ExplosionScale = 1.f;
 
     UPROPERTY(EditAnywhere, Category = "TG")
     float HitDamage = 10.f;
+
+    UPROPERTY(EditAnywhere, Category = "TG")
+    float LifeSpanAfterHit = 5.f;
 
 private:
     UFUNCTION()
@@ -53,4 +69,6 @@ private:
         FVector NormalImpulse, const FHitResult& Hit);
 
     void SpawnDestroyCosmetics();
+    void SpawnTrailSystem();
+    void DeactivateAndDestroy();
 };
